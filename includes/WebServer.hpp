@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:25:44 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/20 21:30:14 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 18:10:29 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,5 +68,7 @@ class throwMessageErrno : public std::exception {
 };
 
 void throwError(const std::exception& ex);
+int treat(int sd, char *buffer);
+
 
 #endif

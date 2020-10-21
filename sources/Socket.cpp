@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:38:43 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/20 23:22:18 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 17:42:47 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,6 +127,7 @@ Socket::Socket(const Config& config)
 	catch(const std::exception& e)
 	{
 		throwError(e);
+		throw(throwMessage("Stop program"));
 	}
 }
 

@@ -7,6 +7,7 @@ SOURCES_FOLDER = sources/
 SOURCES =	WebServer.cpp \
 			Socket.cpp \
 			SocketManager.cpp \
+			Server.cpp \
 			Error.cpp
 #===============================================================================
 
@@ -14,6 +15,7 @@ SOURCES =	WebServer.cpp \
 INCLUDES_FOLDER = includes/
 INCLUDES = 	WebServer.hpp \
 			Socket.hpp \
+			Server.hpp \
 			SocketManager.hpp
 
 INCLUDES_PREFIXED = $(addprefix $(INCLUDES_FOLDER), $(INCLUDES))
