@@ -8,6 +8,8 @@ SOURCES =	WebServ.cpp \
 			Socket.cpp \
 			SocketManager.cpp \
 			Server.cpp \
+			Configuration.cpp \
+			parsing.cpp \
 			Error.cpp
 #===============================================================================
 
@@ -16,6 +18,8 @@ INCLUDES_FOLDER = includes/
 INCLUDES = 	WebServ.hpp \
 			Socket.hpp \
 			Server.hpp \
+			Configuration.hpp \
+			parsing.hpp \
 			SocketManager.hpp
 
 INCLUDES_PREFIXED = $(addprefix $(INCLUDES_FOLDER), $(INCLUDES))
@@ -29,7 +33,7 @@ OBJECTS = $(addprefix $(OBJECTS_FOLDER), $(OBJECT))
 #===============================================================================
 
 # FLAGS ========================================================================
-FLAGS = -Wall -Wextra -Werror -std=c++98
+FLAGS = -Wall -Wextra -Werror
 #===============================================================================
 
 DEBUG_VALUE = 0

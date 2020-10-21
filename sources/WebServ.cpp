@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 21:12:32 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 21:34:44 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,23 @@
 #include "../includes/Socket.hpp"
 #include "../includes/SocketManager.hpp"
 #include "../includes/Server.hpp"
+#include "../includes/Configuration.hpp"
 
 int main(int argc, char **argv)
 {
     (void)argc;
     (void)argv;
     DEBUG("")
-    Config config(2020);
-    Config config2(2021);
+   
     Socket *plop = NULL;
     Socket *plop2 = NULL;
     try
     {
+        Configuration test = Configuration("./confs/test.conf");
+		test.print();
+		std::cout << test.getServers().size() << std::endl;
+        Config config(test.getServers()[0].port);
+        Config config2(test.getServers()[1].port);
         plop = new Socket(config);
         plop2 = new Socket(config2);
         SocketManager sm;
@@ -49,6 +54,7 @@ int main(int argc, char **argv)
 //Temptorary
 int treat(int sd, char *buffer)
 {
+    (void)buffer;
     DEBUG("TREATMENT");
     DEBUG("BUFFER :\n" << buffer);
 
