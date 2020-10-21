@@ -66,18 +66,24 @@ std::string readFile(std::string file)
 	char buffer[BUFFER_SIZE + 1] = {0};
 	int fd;
 	int i;
+	int res;
 	std::string result;
 
 	fd = open(file.c_str(), O_RDONLY);
 	if (fd < -1)
+	{
+		std::cout << "Error" << std::endl;
 		throw ParsingException(0, "The file " + file + " does not exists.");
-	while (read(fd, buffer, BUFFER_SIZE) > 0)
+	}
+	while ((res = read(fd, buffer, BUFFER_SIZE)) > 0)
 	{
 		result += buffer;
 		i = 0;
 		while (i < BUFFER_SIZE)
 			buffer[i++] = 0;
 	}
+	if (res < 0)
+		throw ParsingException(0, "Error while reading " + file + ".");
 	close(fd);
 	return (result);
 }
