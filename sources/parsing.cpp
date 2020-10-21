@@ -237,15 +237,10 @@ bool isSkippable(std::string source, size_t line)
 size_t uIntegerParam(std::string param, size_t line)
 {
 	size_t value;
+	std::istringstream convert(param);
 
-	try
-	{
-		value = std::stoi(param);
-	}
-	catch (const std::exception &e)
-	{
+	if (!(convert >> value))
 		throw ParsingException(line, "'" + param + "' is not a positive integer.");
-	}
 	if (value < 0)
 		throw ParsingException(line, "'" + param + "' is not a positive integer.");
 	return (value);
@@ -285,4 +280,17 @@ bool boolParam(std::string param, size_t line)
 		return (false);
 	else
 		throw ParsingException(line, "Boolean parameter should be \"yes\" or \"no\".");
+}
+
+/**
+* Converts a size_t in std::string
+* @param n the size_t to convert
+* @return the std::string representation of n
+*/
+std::string uIntegerToString(size_t n)
+{
+	std::ostringstream convert;
+
+	convert << n;
+	return (convert.str());
 }

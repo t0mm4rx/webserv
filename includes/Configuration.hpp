@@ -5,6 +5,7 @@
 # include <map>
 # include <string>
 # include <iostream>
+# include <sstream>
 # include "parsing.hpp"
 
 class Configuration
@@ -26,7 +27,7 @@ class Configuration
 		{
 			std::string name;
 			std::string host;
-				std::map<int, std::string> error_pages;
+			std::map<int, std::string> error_pages;
 			std::vector<location> locations;
 			size_t client_max_body_size;
 			size_t port;

@@ -8,6 +8,7 @@
 # include <iostream>
 # include <cstdlib>
 # include <vector>
+# include <sstream>
 
 static const char* server_properties[] = {
 	"listen",
@@ -42,23 +43,6 @@ static const char* methods[] = {
 	0
 };
 
-class ParsingException : public std::exception
-{
-	private:
-		std::string _msg;
-	public:
-		ParsingException(int line = 0, std::string msg = "Unable to parse the given config file.")
-		// : _msg("Line " + std::itoa(line + 1) + ": " + msg)
-		: _msg(msg)
-		{(void)line;};
-		~ParsingException() throw()
-		{};
-		const char *what () const throw ()
-		{
-			return (_msg.c_str());
-		};
-};
-
 size_t countLines(std::string source);
 size_t getClosingBracket(std::string source, size_t line);
 std::vector<std::string> parseProperty(std::string source, size_t line, std::string object);
@@ -72,5 +56,22 @@ bool endsWithOpenBracket(std::string source, size_t line);
 size_t uIntegerParam(std::string param, size_t line);
 bool boolParam(std::string param, size_t line);
 bool isMethodValid(std::string method);
+std::string uIntegerToString(size_t value);
+
+class ParsingException : public std::exception
+{
+	private:
+		std::string _msg;
+	public:
+		ParsingException(int line = 0, std::string msg = "Unable to parse the given config file.")
+		: _msg("Line: " + uIntegerToString(line + 1) + ": " + msg)
+		{};
+		~ParsingException() throw()
+		{};
+		const char *what () const throw ()
+		{
+			return (_msg.c_str());
+		};
+};
 
 #endif
