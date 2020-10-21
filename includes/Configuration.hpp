@@ -18,7 +18,7 @@ class Configuration
 			std::vector<std::string> methods;
 			bool autoindex;
 			std::string index;
-			std::string cgi_extension;
+			std::vector<std::string> cgi_extension;
 			std::string cgi_path;
 			bool upload_enable;
 			std::string upload_path;

@@ -178,7 +178,10 @@ void Configuration::_parseLocationProperty(std::string source, size_t n, locatio
 	if (line[0] == route_properties[3])
 		l.index = line[1];
 	if (line[0] == route_properties[4])
-		l.cgi_extension = line[1];
+	{
+		for (size_t i = 1; i < line.size(); ++i)
+		l.cgi_extension.push_back(line[i]);
+	}
 	if (line[0] == route_properties[5])
 		l.cgi_path = line[1];
 	if (line[0] == route_properties[6])
@@ -200,12 +203,12 @@ void Configuration::print(void)
 		std::cout << "- Server" << std::endl;
 		std::cout << "   * server_name: " + _servers[i].name << std::endl;
 		std::cout << "   * host: " + _servers[i].host << std::endl;
-		// std::cout << "   * port: " + std::to_string(_servers[i].port) << std::endl;
-		// std::cout << "   * client_max_body_size: " + std::to_string(_servers[i].client_max_body_size) << std::endl;
+		std::cout << "   * port: " + uIntegerToString(_servers[i].port) << std::endl;
+		std::cout << "   * client_max_body_size: " + uIntegerToString(_servers[i].client_max_body_size) << std::endl;
 		it = _servers[i].error_pages.begin();
 		while (it != _servers[i].error_pages.end())
 		{
-			// std::cout << "   * error_page for " + std::to_string(it->first) + ": " + it->second << std::endl;
+			std::cout << "   * error_page for " + uIntegerToString(it->first) + ": " + it->second << std::endl;
 			++it;
 		}
 		it2 = _servers[i].locations.begin();
@@ -217,7 +220,10 @@ void Configuration::print(void)
 				std::cout << it2->methods[j] + " ";
 			std::cout << std::endl;
 			std::cout << "     * root: " << it2->root << std::endl;
-			std::cout << "     * cgi_extension: " << it2->cgi_extension << std::endl;
+			std::cout << "     * cgi_extension: ";
+			for (size_t j = 0; j < it2->cgi_extension.size(); ++j)
+				std::cout << it2->cgi_extension[i] << " ";
+			std::cout << std::endl;
 			std::cout << "     * cgi_path: " << it2->cgi_path << std::endl;
 			std::cout << "     * autoindex: " << it2->autoindex << std::endl;
 			std::cout << "     * upload_enable: " << it2->upload_enable << std::endl;
