@@ -36,15 +36,21 @@ size_t getClosingBracket(std::string source, size_t line)
 */
 std::string readFile(std::string file)
 {
-	char buffer[BUFFER_SIZE] = {0};
+	char buffer[BUFFER_SIZE + 1] = {0};
 	int fd;
+	int i;
 	std::string result;
 
 	fd = open(file.c_str(), O_RDONLY);
 	if (fd < -1)
 		throw ParsingException(0, "The file " + file + " does not exists.");
 	while (read(fd, buffer, BUFFER_SIZE) > 0)
+	{
 		result += buffer;
+		i = 0;
+		while (i < BUFFER_SIZE)
+			buffer[i++] = 0;
+	}
 	close(fd);
 	return (result);
 }
@@ -75,7 +81,7 @@ std::string getLine(std::string source, size_t n)
 	j = 0;
 	while (source[i + j] && source[i + j] != '\n')
 		++j;
-	while (std::isspace(source[i + j - 1]) && source[i + j - 1] != '\n')
+	while (j > 0 && std::isspace(source[i + j - 1]))
 		--j;
 	return (std::string(source, i, j));
 }
