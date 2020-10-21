@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 20:45:37 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/22 01:06:45 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,10 @@ void Server::loop()
                         if (this->receiveConnection(i, buffer, 40000) < 0)
                             max_sd = this->closeConnection(i, max_sd, &master_set);
                         else                        
+                        {
+                            HeadersBlock test(buffer);
                             treat(i, buffer);  //Temporary
+                        }
                     }
                 }
         }

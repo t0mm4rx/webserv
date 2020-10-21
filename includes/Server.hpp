@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:24:51 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 18:06:16 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/22 01:06:06 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define SERVER_HPP
 
 #include "SocketManager.hpp"
+#include "HeadersBlock.hpp"
 #include <unistd.h>
 
 class Server

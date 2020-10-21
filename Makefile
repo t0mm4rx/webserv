@@ -9,6 +9,7 @@ SOURCES =	WebServ.cpp \
 			SocketManager.cpp \
 			Server.cpp \
 			Configuration.cpp \
+			HeadersBlock.cpp \
 			parsing.cpp \
 			Error.cpp
 #===============================================================================
@@ -19,6 +20,7 @@ INCLUDES = 	WebServ.hpp \
 			Socket.hpp \
 			Server.hpp \
 			Configuration.hpp \
+			HeadersBlock.hpp \
 			parsing.hpp \
 			SocketManager.hpp
 
