@@ -13,19 +13,46 @@ size_t getClosingBracket(std::string source, size_t line)
 {
 	size_t n;
 	size_t size;
+	size_t open_brackets;
 
+	open_brackets = 0;
 	if (getLine(source, line)[getLine(source, line).size() - 1] != '{')
 		throw ParsingException(line, "Expected '{'.");
 	n = line + 1;
 	size = countLines(source);
 	while (n < size)
 	{
-		if (getLine(source, n) == "}")
-			return (n);
+		if (!isSkippable(source, n) && endsWithOpenBracket(source, n))
+			++open_brackets;
+		if (!isSkippable(source, n) && getLine(source, n) == "}")
+		{
+			if (open_brackets == 0)
+				return (n);
+			--open_brackets;
+		}
 		++n;
 	}
 	throw ParsingException(line, "Expected '}'.");
 	return (-1);
+}
+
+/**
+* Does the given line in source has a '{' as last char
+* @param source the config string
+* @param line the line to check
+* @return wether the lines ends with '{'
+*/
+bool endsWithOpenBracket(std::string source, size_t line)
+{
+	std::vector<std::string> splits;
+
+	splits = splitWhitespace(getLine(source, line));
+	if (splits.size() > 0)
+	{
+		if (splits[splits.size() - 1] == "{")
+			return (true);
+	}
+	return (false);
 }
 
 /**
@@ -222,4 +249,40 @@ size_t uIntegerParam(std::string param, size_t line)
 	if (value < 0)
 		throw ParsingException(line, "'" + param + "' is not a positive integer.");
 	return (value);
+}
+
+/**
+* Check if a given method exists
+* @param method the method to check
+* @return wether the method given is valid or not
+*/
+bool isMethodValid(std::string method)
+{
+	size_t i;
+
+	i = 0;
+	while (methods[i])
+	{
+		if (methods[i] == method)
+			return (true);
+		++i;
+	}
+	return (false);
+}
+
+/**
+* Converts a "yes"/"no" string into a bool
+* @param param the param to convert
+* @param line the line where the param occurs
+* @throw ParsingException if the param isn't "yes" or "no"
+* @return the boolean value of the string
+*/
+bool boolParam(std::string param, size_t line)
+{
+	if (param == "yes")
+		return (true);
+	else if (param == "no")
+		return (false);
+	else
+		throw ParsingException(line, "Boolean parameter should be \"yes\" or \"no\".");
 }

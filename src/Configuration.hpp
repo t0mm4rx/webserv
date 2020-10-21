@@ -13,6 +13,14 @@ class Configuration
 		struct location
 		{
 			std::string name;
+			std::string root;
+			std::vector<std::string> methods;
+			bool autoindex;
+			std::string index;
+			std::string cgi_extension;
+			std::string cgi_path;
+			bool upload_enable;
+			std::string upload_path;
 		};
 		struct server
 		{
@@ -27,6 +35,9 @@ class Configuration
 		std::vector<server> _servers;
 		void _parseConfig(std::string file);
 		void _parseServer(std::string source, size_t line_start, size_t line_end);
+		void _parseServerProperty(std::string source, size_t line, server &s);
+		void _parseLocationProperty(std::string source, size_t line, location &l);
+		location _parseLocation(std::string source, size_t line_start, size_t line_end);
 	public:
 		Configuration(void);
 		Configuration(std::string file);

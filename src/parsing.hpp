@@ -29,6 +29,19 @@ static const char* route_properties[] = {
 	0
 };
 
+static const char* methods[] = {
+	"GET",
+	"HEAD",
+	"POST",
+	"PUT",
+	"DELETE",
+	"CONNECT",
+	"OPTIONS",
+	"TRACE",
+	"PATCH",
+	0
+};
+
 class ParsingException : public std::exception
 {
 	private:
@@ -54,6 +67,9 @@ std::string readFile(std::string file);
 std::string itoa(int n);
 std::string getLine(std::string, size_t line);
 bool isSkippable(std::string source, size_t line);
+bool endsWithOpenBracket(std::string source, size_t line);
 size_t uIntegerParam(std::string param, size_t line);
+bool boolParam(std::string param, size_t line);
+bool isMethodValid(std::string method);
 
 #endif

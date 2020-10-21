@@ -4,7 +4,7 @@ int main(void)
 {
 	try
 	{
-		Configuration test = Configuration("./confs/test.conf");
+		Configuration test = Configuration("./confs/conf-1.conf");
 		test.print();
 	}
 	catch (const ParsingException &e)
