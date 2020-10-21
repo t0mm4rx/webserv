@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:34:20 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 21:13:21 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 23:50:06 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <fcntl.h> 
 
 # include "WebServ.hpp"
+# include "Configuration.hpp"
 
 #define MAX_CONNECTION 9999
 
@@ -38,7 +39,7 @@ class Socket
 		void	socketListener(void);
 	
 	public:
-		Socket(const Config& config);
+		Socket(const struct Configuration::server& server);
 		Socket(const Socket& copy);
 		virtual ~Socket();
 		Socket &operator=(const Socket& op);
