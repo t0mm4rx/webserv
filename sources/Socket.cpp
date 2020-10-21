@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:38:43 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 20:39:57 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 23:50:19 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,14 +113,14 @@ void Socket::socketListener(void)
  *
  *  @param config the config of the socket.
  */
-Socket::Socket(const Config& config)
+Socket::Socket(const struct Configuration::server& server)
 {
 	try
 	{
 		this->createSocketDescriptor();
 		this->setSocketOptions();
 		this->setSocketNonBlocking();
-		this->initAddress(config.getPort());
+		this->initAddress(server.port);
 		this->bindSocket();
 		this->socketListener();
 	}
