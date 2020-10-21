@@ -6,6 +6,7 @@ int main(void)
 	{
 		Configuration test = Configuration("./confs/conf-1.conf");
 		test.print();
+		std::cout << test.getServers().size() << std::endl;
 	}
 	catch (const ParsingException &e)
 	{

@@ -26,7 +26,7 @@ class Configuration
 		{
 			std::string name;
 			std::string host;
-			std::map<int, std::string> error_pages;
+				std::map<int, std::string> error_pages;
 			std::vector<location> locations;
 			size_t client_max_body_size;
 			size_t port;
@@ -43,6 +43,7 @@ class Configuration
 		Configuration(std::string file);
 		Configuration &operator=(const Configuration &other);
 		~Configuration(void);
+		std::vector<server> getServers(void);
 		void print(void);
 };
 

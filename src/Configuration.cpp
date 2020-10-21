@@ -225,3 +225,12 @@ void Configuration::print(void)
 		}
 	}
 };
+
+/**
+* Get servers configuration
+* @return servers configurations
+*/
+std::vector<Configuration::server> Configuration::getServers(void)
+{
+	return (_servers);
+}
