@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:34:20 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 20:39:16 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 21:13:21 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <netinet/in.h>
 #include <fcntl.h> 
 
-# include "WebServer.hpp"
+# include "WebServ.hpp"
 
 #define MAX_CONNECTION 9999
 

@@ -1,10 +1,10 @@
 # COMMON =======================================================================
-NAME = WebServer
+NAME = WebServ
 #===============================================================================
 
 # SOURCES ======================================================================
 SOURCES_FOLDER = sources/
-SOURCES =	WebServer.cpp \
+SOURCES =	WebServ.cpp \
 			Socket.cpp \
 			SocketManager.cpp \
 			Server.cpp \
@@ -13,7 +13,7 @@ SOURCES =	WebServer.cpp \
 
 # INCLUDES =====================================================================
 INCLUDES_FOLDER = includes/
-INCLUDES = 	WebServer.hpp \
+INCLUDES = 	WebServ.hpp \
 			Socket.hpp \
 			Server.hpp \
 			SocketManager.hpp

@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   WebServer.cpp                                      :+:      :+:    :+:   */
+/*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 20:37:20 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 21:12:32 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/WebServer.hpp"
+#include "../includes/WebServ.hpp"
 #include "../includes/Socket.hpp"
 #include "../includes/SocketManager.hpp"
 #include "../includes/Server.hpp"
