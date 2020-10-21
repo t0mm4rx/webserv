@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 18:10:40 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 20:37:20 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,12 @@ int main(int argc, char **argv)
     DEBUG("")
     Config config(2020);
     Config config2(2021);
-
+    Socket *plop = NULL;
+    Socket *plop2 = NULL;
     try
     {
-        Socket *plop = new Socket(config);
-        Socket *plop2 = new Socket(config2);
+        plop = new Socket(config);
+        plop2 = new Socket(config2);
         SocketManager sm;
 
         sm.registerSocket(plop);
@@ -35,15 +36,13 @@ int main(int argc, char **argv)
         Server server(sm);
         
         server.loop();
-        delete plop;
-        delete plop2;
     }
     catch(const std::exception& e)
     {
         throwError(e);
-        return (1);
     }
-
+    delete plop;
+    delete plop2;
     return (0);
 }
 

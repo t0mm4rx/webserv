@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 18:14:39 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 20:45:37 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,9 @@ int Server::receiveConnection(int sd, char *buffer, int buffer_size)
     if (rc <= 0)
     {
         if (rc == 0)
-            throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : Connection closed\n"));
+            std::cout << "Connection closed...\n";
         else if (errno != EWOULDBLOCK)
-            throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed\n"));
+            throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
         return (-1);
     }
     return (0);
@@ -152,21 +152,18 @@ void Server::loop()
                         max_sd = this->acceptConnection(i, max_sd, &master_set);
                     else
                     {
-                        char buffer[4000];
-                        if (this->receiveConnection(i, buffer, 4000) < 0)
-                            break;
-                        
-                        //Temporary
-                        treat(i, buffer);
-                        
-                        max_sd = this->closeConnection(i, max_sd, &master_set);
+                        char buffer[40000];
+                        bzero(buffer, 40000);
+                        if (this->receiveConnection(i, buffer, 40000) < 0)
+                            max_sd = this->closeConnection(i, max_sd, &master_set);
+                        else                        
+                            treat(i, buffer);  //Temporary
                     }
                 }
         }
         catch(const std::exception& e)
         {
             throwError(e);
-            break;
         }
     }
 }

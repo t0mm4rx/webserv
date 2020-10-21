@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:38:43 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 17:42:47 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/21 20:39:57 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,17 +131,30 @@ Socket::Socket(const Config& config)
 	}
 }
 
-// WIP
+/**
+ * 	@brief Copy another socket.
+ * 
+ * 	@param copy the socket to copy.
+ */
 Socket::Socket(const Socket& copy)
-{ (void)copy; }
+:
+	_sd(copy._sd),
+	_option_buffer(copy._option_buffer),
+	_address(copy._address)
+{}
 
-// WIP
 Socket::~Socket()
 {}
 
-// WIP
 Socket &Socket::operator=(const Socket& op)
-{ (void)op; return (*this); }
+{
+	if (&op == this)
+		return (*this);
+	this->_sd = op._sd;
+	this->_option_buffer = op._option_buffer;
+	this->_address = op._address;
+	return (*this);
+}
 
 /**
  * 	@return the socket descriptor of the socket.
