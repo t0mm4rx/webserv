@@ -47,6 +47,7 @@ void Configuration::_parseConfig(std::string file)
 		}
 		++i;
 	}
+	_validateConfig();
 }
 
 /**
@@ -233,4 +234,14 @@ void Configuration::print(void)
 std::vector<Configuration::server> Configuration::getServers(void)
 {
 	return (_servers);
+}
+
+/**
+* Check if the parsed configuration is correct.
+* @throw ParsingException if the config is not valid.
+*/
+void Configuration::_validateConfig(void)
+{
+	if (_servers.size() == 0)
+		throw ParsingException(0, "Your configuration file must provide at least one server.");
 }
