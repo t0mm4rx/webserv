@@ -61,6 +61,7 @@ void Configuration::_parseServer(std::string source, size_t line_start, size_t l
 	server s;
 	std::vector<std::string> line;
 
+	s = _defaultServer();
 	for (size_t n = line_start + 1; n < line_end; ++n)
 	{
 		if (!isSkippable(source, n))
@@ -138,6 +139,7 @@ Configuration::location Configuration::_parseLocation(std::string source, size_t
 	location loc;
 	std::vector<std::string> line;
 
+	loc = _defaultLocation();
 	line = splitWhitespace(getLine(source, line_start));
 	if (line.size() != 3)
 		throw ParsingException(line_start, "Location should have a name.");
@@ -250,4 +252,40 @@ void Configuration::_validateConfig(void)
 {
 	if (_servers.size() == 0)
 		throw ParsingException(0, "Your configuration file must provide at least one server.");
+}
+
+/**
+* Get the default server configuration
+* @return the default server struct
+*/
+Configuration::server Configuration::_defaultServer(void)
+{
+	server s;
+
+	s.name = "localhost";
+	s.port = 80;
+	s.host = "127.0.0.1";
+	s.error_pages[405] = "./assets/405.html";
+	s.error_pages[404] = "./assets/404.html";
+	s.error_pages[403] = "./assets/403.html";
+	s.error_pages[401] = "./assets/401.html";
+	s.client_max_body_size = 1048576;
+	return (s);
+}
+
+/**
+* Get the default location configuration
+* @return the default location struct
+*/
+Configuration::location Configuration::_defaultLocation(void)
+{
+	location l;
+
+	l.name = "/";
+	l.root = "/www";
+	l.autoindex = false;
+	l.cgi_path = "";
+	l.upload_enable = false;
+	l.upload_path = "/www/uploads";
+	return (l);
 }

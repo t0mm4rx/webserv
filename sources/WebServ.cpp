@@ -28,7 +28,6 @@ int main(int argc, char **argv)
     {
         Configuration test = Configuration("./confs/test.conf");
 		test.print();
-		std::cout << test.getServers().size() << std::endl;
         Config config(test.getServers()[0].port);
         Config config2(test.getServers()[1].port);
         plop = new Socket(config);

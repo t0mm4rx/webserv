@@ -39,6 +39,8 @@ class Configuration
 		void _parseServerProperty(std::string source, size_t line, server &s);
 		void _parseLocationProperty(std::string source, size_t line, location &l);
 		void _validateConfig(void);
+		server _defaultServer(void);
+		location _defaultLocation(void);
 		location _parseLocation(std::string source, size_t line_start, size_t line_end);
 	public:
 		Configuration(void);

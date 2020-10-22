@@ -272,20 +272,20 @@ bool isMethodValid(std::string method)
 }
 
 /**
-* Converts a "yes"/"no" string into a bool
+* Converts a "on"/"off" string into a bool
 * @param param the param to convert
 * @param line the line where the param occurs
-* @throw ParsingException if the param isn't "yes" or "no"
+* @throw ParsingException if the param isn't "on" or "off"
 * @return the boolean value of the string
 */
 bool boolParam(std::string param, size_t line)
 {
-	if (param == "yes")
+	if (param == "on")
 		return (true);
-	else if (param == "no")
+	else if (param == "off")
 		return (false);
 	else
-		throw ParsingException(line, "Boolean parameter should be \"yes\" or \"no\".");
+		throw ParsingException(line, "Boolean parameter should be \"on\" or \"off\".");
 }
 
 /**
