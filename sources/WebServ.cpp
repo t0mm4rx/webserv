@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 21:34:44 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/22 00:12:03 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,24 +18,28 @@
 
 int main(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    char *path;
+
+    if (argc != 2)
+    {
+        outError("Please use : ./WebServ <path>");
+        return (1);
+    }
+    path = argv[1];
+    
     DEBUG("")
    
-    Socket *plop = NULL;
-    Socket *plop2 = NULL;
+    std::vector<Socket *> socket_list;
     try
     {
-        Configuration test = Configuration("./confs/test.conf");
-		test.print();
-        Config config(test.getServers()[0].port);
-        Config config2(test.getServers()[1].port);
-        plop = new Socket(config);
-        plop2 = new Socket(config2);
+        Configuration test = Configuration(path);
+		    test.print();
+        for (int i = 0; i < (int)test.getServers().size(); i++)
+            socket_list.push_back(new Socket(test.getServers()[i]));
         SocketManager sm;
 
-        sm.registerSocket(plop);
-        sm.registerSocket(plop2);
+        for (int i = 0; i < (int)socket_list.size(); i++)
+            sm.registerSocket(*(socket_list.begin() + i));
 
         Server server(sm);
         
@@ -45,8 +49,6 @@ int main(int argc, char **argv)
     {
         throwError(e);
     }
-    delete plop;
-    delete plop2;
     return (0);
 }
 

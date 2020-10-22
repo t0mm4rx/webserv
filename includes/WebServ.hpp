@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:25:44 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 21:12:42 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/22 00:11:23 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,18 +24,6 @@
 #include <exception>
 #include <iostream>
 #include <sstream>
-
-class Config
-{
-    private:
-        int _port;
-
-    public:
-        Config(int port) : _port(port) {}
-        ~Config() {}
-
-        int getPort() const { return (_port); }
-};
 
 class throwMessage : public std::exception {
     private:
@@ -68,6 +56,8 @@ class throwMessageErrno : public std::exception {
 };
 
 void throwError(const std::exception& ex);
+void outError(const std::string& msg);
+
 int treat(int sd, char *buffer);
 
 
