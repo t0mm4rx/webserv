@@ -9,6 +9,8 @@
 # include <cstdlib>
 # include <vector>
 # include <sstream>
+# include <sys/stat.h>
+# include <sys/types.h>
 
 static const char* server_properties[] = {
 	"listen",
@@ -39,7 +41,6 @@ static const char* methods[] = {
 	"CONNECT",
 	"OPTIONS",
 	"TRACE",
-	"PATCH",
 	0
 };
 
@@ -57,6 +58,8 @@ size_t uIntegerParam(std::string param, size_t line);
 bool boolParam(std::string param, size_t line);
 bool isMethodValid(std::string method);
 std::string uIntegerToString(size_t value);
+std::string replace(std::string source, std::string to_replace, std::string new_value);
+int pathType(std::string path);
 
 class ParsingException : public std::exception
 {

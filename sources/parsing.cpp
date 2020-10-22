@@ -300,3 +300,39 @@ std::string uIntegerToString(size_t n)
 	convert << n;
 	return (convert.str());
 }
+
+/**
+ * Replace all occurences in a std::string
+ * @param source the string to replace from
+ * @param to_replace the string to replace
+ * @param new_value the value to replace by
+ * @return the processed string
+ */
+std::string replace(std::string source, std::string to_replace, std::string new_value) {
+	size_t start_pos = 0;
+	while((start_pos = source.find(to_replace, start_pos)) != std::string::npos) {
+		source.replace(start_pos, to_replace.length(), new_value);
+		start_pos += new_value.length();
+	}
+	return (source);
+}
+
+/**
+ * Check if a path is non-existent, a file, or a directory
+ * @param path the path to check
+ * @return 0 if the path is non-existant, 1 if the path is a file, 2 if the path is a directory
+ */
+int pathType(std::string path)
+{
+	struct stat buffer;
+	int exist = stat(path.c_str(), &buffer);
+	if (exist == 0)
+	{
+		if (S_ISREG(buffer.st_mode))
+			return (1);
+		else
+			return (2);
+	}
+	else
+		return (0);
+}

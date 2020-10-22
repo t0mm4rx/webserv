@@ -15,6 +15,7 @@
 #include "../includes/SocketManager.hpp"
 #include "../includes/Server.hpp"
 #include "../includes/Configuration.hpp"
+#include "../includes/RequestInterpretor.hpp"
 
 int main(int argc, char **argv)
 {
@@ -52,15 +53,17 @@ int main(int argc, char **argv)
     return (0);
 }
 
-//Temptorary
 int treat(int sd, char *buffer)
 {
-    (void)buffer;
-    DEBUG("TREATMENT");
-    DEBUG("BUFFER :\n" << buffer);
+	Configuration::server s;
+	Configuration::location l;
 
-    char bufferrtn[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 14\n\n<h1>Hello</h1>";      
-    int rc = send(sd, bufferrtn, strlen(bufferrtn), 0);
+	l.root = "/Users/tom/Documents/www/";
+	l.index = "index.html";
+	l.autoindex = true;
+	s.locations.push_back(l);
+	std::string response = RequestInterpretor(std::string(buffer), s).getResponse();
+    int rc = send(sd, response.c_str(), response.size(), 0);
     if (rc < 0)
     {
         DEBUG("  send() failed");
