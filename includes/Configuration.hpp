@@ -5,6 +5,7 @@
 # include <map>
 # include <string>
 # include <iostream>
+# include <sstream>
 # include "parsing.hpp"
 
 class Configuration
@@ -17,7 +18,7 @@ class Configuration
 			std::vector<std::string> methods;
 			bool autoindex;
 			std::string index;
-			std::string cgi_extension;
+			std::vector<std::string> cgi_extension;
 			std::string cgi_path;
 			bool upload_enable;
 			std::string upload_path;
@@ -26,7 +27,7 @@ class Configuration
 		{
 			std::string name;
 			std::string host;
-				std::map<int, std::string> error_pages;
+			std::map<int, std::string> error_pages;
 			std::vector<location> locations;
 			size_t client_max_body_size;
 			size_t port;
@@ -37,6 +38,9 @@ class Configuration
 		void _parseServer(std::string source, size_t line_start, size_t line_end);
 		void _parseServerProperty(std::string source, size_t line, server &s);
 		void _parseLocationProperty(std::string source, size_t line, location &l);
+		void _validateConfig(void);
+		server _defaultServer(void);
+		location _defaultLocation(void);
 		location _parseLocation(std::string source, size_t line_start, size_t line_end);
 	public:
 		Configuration(void);

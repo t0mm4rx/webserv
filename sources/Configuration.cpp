@@ -47,6 +47,7 @@ void Configuration::_parseConfig(std::string file)
 		}
 		++i;
 	}
+	_validateConfig();
 }
 
 /**
@@ -60,6 +61,7 @@ void Configuration::_parseServer(std::string source, size_t line_start, size_t l
 	server s;
 	std::vector<std::string> line;
 
+	s = _defaultServer();
 	for (size_t n = line_start + 1; n < line_end; ++n)
 	{
 		if (!isSkippable(source, n))
@@ -137,6 +139,7 @@ Configuration::location Configuration::_parseLocation(std::string source, size_t
 	location loc;
 	std::vector<std::string> line;
 
+	loc = _defaultLocation();
 	line = splitWhitespace(getLine(source, line_start));
 	if (line.size() != 3)
 		throw ParsingException(line_start, "Location should have a name.");
@@ -177,7 +180,10 @@ void Configuration::_parseLocationProperty(std::string source, size_t n, locatio
 	if (line[0] == route_properties[3])
 		l.index = line[1];
 	if (line[0] == route_properties[4])
-		l.cgi_extension = line[1];
+	{
+		for (size_t i = 1; i < line.size(); ++i)
+		l.cgi_extension.push_back(line[i]);
+	}
 	if (line[0] == route_properties[5])
 		l.cgi_path = line[1];
 	if (line[0] == route_properties[6])
@@ -199,12 +205,12 @@ void Configuration::print(void)
 		std::cout << "- Server" << std::endl;
 		std::cout << "   * server_name: " + _servers[i].name << std::endl;
 		std::cout << "   * host: " + _servers[i].host << std::endl;
-		// std::cout << "   * port: " + std::to_string(_servers[i].port) << std::endl;
-		// std::cout << "   * client_max_body_size: " + std::to_string(_servers[i].client_max_body_size) << std::endl;
+		std::cout << "   * port: " + uIntegerToString(_servers[i].port) << std::endl;
+		std::cout << "   * client_max_body_size: " + uIntegerToString(_servers[i].client_max_body_size) << std::endl;
 		it = _servers[i].error_pages.begin();
 		while (it != _servers[i].error_pages.end())
 		{
-			// std::cout << "   * error_page for " + std::to_string(it->first) + ": " + it->second << std::endl;
+			std::cout << "   * error_page for " + uIntegerToString(it->first) + ": " + it->second << std::endl;
 			++it;
 		}
 		it2 = _servers[i].locations.begin();
@@ -216,7 +222,10 @@ void Configuration::print(void)
 				std::cout << it2->methods[j] + " ";
 			std::cout << std::endl;
 			std::cout << "     * root: " << it2->root << std::endl;
-			std::cout << "     * cgi_extension: " << it2->cgi_extension << std::endl;
+			std::cout << "     * cgi_extension: ";
+			for (size_t j = 0; j < it2->cgi_extension.size(); ++j)
+				std::cout << it2->cgi_extension[i] << " ";
+			std::cout << std::endl;
 			std::cout << "     * cgi_path: " << it2->cgi_path << std::endl;
 			std::cout << "     * autoindex: " << it2->autoindex << std::endl;
 			std::cout << "     * upload_enable: " << it2->upload_enable << std::endl;
@@ -233,4 +242,50 @@ void Configuration::print(void)
 std::vector<Configuration::server> Configuration::getServers(void)
 {
 	return (_servers);
+}
+
+/**
+* Check if the parsed configuration is correct.
+* @throw ParsingException if the config is not valid.
+*/
+void Configuration::_validateConfig(void)
+{
+	if (_servers.size() == 0)
+		throw ParsingException(0, "Your configuration file must provide at least one server.");
+}
+
+/**
+* Get the default server configuration
+* @return the default server struct
+*/
+Configuration::server Configuration::_defaultServer(void)
+{
+	server s;
+
+	s.name = "localhost";
+	s.port = 80;
+	s.host = "127.0.0.1";
+	s.error_pages[405] = "./assets/405.html";
+	s.error_pages[404] = "./assets/404.html";
+	s.error_pages[403] = "./assets/403.html";
+	s.error_pages[401] = "./assets/401.html";
+	s.client_max_body_size = 1048576;
+	return (s);
+}
+
+/**
+* Get the default location configuration
+* @return the default location struct
+*/
+Configuration::location Configuration::_defaultLocation(void)
+{
+	location l;
+
+	l.name = "/";
+	l.root = "/www";
+	l.autoindex = false;
+	l.cgi_path = "";
+	l.upload_enable = false;
+	l.upload_path = "/www/uploads";
+	return (l);
 }
