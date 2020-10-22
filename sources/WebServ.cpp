@@ -33,8 +33,7 @@ int main(int argc, char **argv)
     try
     {
         Configuration test = Configuration(path);
-		test.print();
-		std::cout << test.getServers().size() << std::endl;
+		    test.print();
         for (int i = 0; i < (int)test.getServers().size(); i++)
             socket_list.push_back(new Socket(test.getServers()[i]));
         SocketManager sm;

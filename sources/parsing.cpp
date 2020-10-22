@@ -66,18 +66,24 @@ std::string readFile(std::string file)
 	char buffer[BUFFER_SIZE + 1] = {0};
 	int fd;
 	int i;
+	int res;
 	std::string result;
 
 	fd = open(file.c_str(), O_RDONLY);
 	if (fd < -1)
+	{
+		std::cout << "Error" << std::endl;
 		throw ParsingException(0, "The file " + file + " does not exists.");
-	while (read(fd, buffer, BUFFER_SIZE) > 0)
+	}
+	while ((res = read(fd, buffer, BUFFER_SIZE)) > 0)
 	{
 		result += buffer;
 		i = 0;
 		while (i < BUFFER_SIZE)
 			buffer[i++] = 0;
 	}
+	if (res < 0)
+		throw ParsingException(0, "Error while reading " + file + ".");
 	close(fd);
 	return (result);
 }
@@ -237,15 +243,10 @@ bool isSkippable(std::string source, size_t line)
 size_t uIntegerParam(std::string param, size_t line)
 {
 	size_t value;
+	std::istringstream convert(param);
 
-	try
-	{
-		value = std::stoi(param);
-	}
-	catch (const std::exception &e)
-	{
+	if (!(convert >> value))
 		throw ParsingException(line, "'" + param + "' is not a positive integer.");
-	}
 	if (value < 0)
 		throw ParsingException(line, "'" + param + "' is not a positive integer.");
 	return (value);
@@ -271,18 +272,31 @@ bool isMethodValid(std::string method)
 }
 
 /**
-* Converts a "yes"/"no" string into a bool
+* Converts a "on"/"off" string into a bool
 * @param param the param to convert
 * @param line the line where the param occurs
-* @throw ParsingException if the param isn't "yes" or "no"
+* @throw ParsingException if the param isn't "on" or "off"
 * @return the boolean value of the string
 */
 bool boolParam(std::string param, size_t line)
 {
-	if (param == "yes")
+	if (param == "on")
 		return (true);
-	else if (param == "no")
+	else if (param == "off")
 		return (false);
 	else
-		throw ParsingException(line, "Boolean parameter should be \"yes\" or \"no\".");
+		throw ParsingException(line, "Boolean parameter should be \"on\" or \"off\".");
+}
+
+/**
+* Converts a size_t in std::string
+* @param n the size_t to convert
+* @return the std::string representation of n
+*/
+std::string uIntegerToString(size_t n)
+{
+	std::ostringstream convert;
+
+	convert << n;
+	return (convert.str());
 }
