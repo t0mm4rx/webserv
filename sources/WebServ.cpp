@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/22 10:30:29 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/23 02:30:30 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,17 @@
 
 int main(int argc, char **argv)
 {
-    // char block[] = "GET / HTTP/1.1\nHost: localhost:5000\nUser-Agent: insomnia/2020.4.1\nAccept: */*\n\n";
-    char block[] = "HTTP/1.1 200 plop\nHost: localhost:5000\nUser-Agent: insomnia/2020.4.1\nAccept: */*\n\n";
-    HeadersBlock test(block);
-    exit(1);
+    // char block[] = "GET / HTTP/12.1\r\nHost: 0.0.0.0:3650\r\nUser-Agent: insomnia/2020.4.1\r\nAccept: */*\r\n\r\n";
+    // char block[] = "HTTP/1.1 200 plop\nHost: localhost:5000\nUser-Agent: insomnia/2020.4.1\nAccept: */*\n\n";
+    // try
+    // {
+    //     HeadersBlock test(block);
+    // }
+    // catch (const std::exception& e)
+    // {
+    //     throwError(e);
+    // }
+    // exit(1);
 
     char *path;
 
