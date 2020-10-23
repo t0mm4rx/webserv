@@ -9,6 +9,7 @@ SOURCES =	WebServ.cpp \
 			SocketManager.cpp \
 			Server.cpp \
 			Configuration.cpp \
+			HeadersBlock.cpp \
 			parsing.cpp \
 			Error.cpp
 #===============================================================================
@@ -19,6 +20,7 @@ INCLUDES = 	WebServ.hpp \
 			Socket.hpp \
 			Server.hpp \
 			Configuration.hpp \
+			HeadersBlock.hpp \
 			parsing.hpp \
 			SocketManager.hpp
 
@@ -33,7 +35,7 @@ OBJECTS = $(addprefix $(OBJECTS_FOLDER), $(OBJECT))
 #===============================================================================
 
 # FLAGS ========================================================================
-FLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address -std=c++98
+FLAGS = -Wall -Wextra -Werror -std=c++98
 #===============================================================================
 
 DEBUG_VALUE = 0
