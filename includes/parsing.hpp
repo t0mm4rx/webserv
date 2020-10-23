@@ -50,6 +50,7 @@ std::vector<std::string> parseProperty(std::string source, size_t line, std::str
 std::vector<std::string> splitWhitespace(std::string source);
 bool isPropertyNameValid(std::string name, const char **valid_names);
 std::string readFile(std::string file);
+std::vector<unsigned char> readBinaryFile(std::string file);
 std::string itoa(int n);
 std::string getLine(std::string, size_t line);
 bool isSkippable(std::string source, size_t line);

@@ -10,6 +10,7 @@ RequestInterpretor::RequestInterpretor(std::string request, Configuration::serve
 : _request(request), _conf(serverConf)
 {
 	this->_ressource = splitWhitespace(getLine(request, 0))[1];
+	this->_location = _getLocation(_ressource);
 }
 
 RequestInterpretor::RequestInterpretor(const RequestInterpretor &other)
@@ -25,6 +26,7 @@ RequestInterpretor &RequestInterpretor::operator=(const RequestInterpretor &othe
 	this->_ressource = other._ressource;
 	this->_request = other._request;
 	this->_conf = other._conf;
+	this->_location = other._location;
 	return (*this);
 }
 
@@ -48,11 +50,12 @@ std::string RequestInterpretor::_get(void)
 {
 	std::map<std::string, std::string> headers;
 	std::string ressource_path;
-	std::string ressource_content;
+	std::vector<unsigned char> content_bytes;
+	unsigned char *ressource_content;
 	int ressource_type;
 
 	headers["Content-Type"] = _getMIMEType(".html");
-	ressource_path = _conf.locations[0].root;
+	ressource_path = _location.root;
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
 	ressource_path += _ressource;
@@ -61,14 +64,14 @@ std::string RequestInterpretor::_get(void)
 		return (_generateResponse(404, headers, _getErrorHTMLPage(404)));
 	if (ressource_type == 2)
 	{
-		if (pathType(ressource_path + _conf.locations[0].index) == 1)
+		if (pathType(ressource_path + _location.index) == 1)
 		{
-			ressource_path = ressource_path + _conf.locations[0].index;
+			ressource_path = ressource_path + _location.index;
 			ressource_type = 1;
 		}
 		else
 		{
-			if (_conf.locations[0].autoindex)
+			if (_location.autoindex)
 				return (_generateResponse(200, headers, _getListingHTMLPage(ressource_path, _ressource)));
 			else
 				return (_generateResponse(403, headers, _getErrorHTMLPage(403)));
@@ -78,9 +81,10 @@ std::string RequestInterpretor::_get(void)
 	{
 		try
 		{
-			ressource_content = readFile(ressource_path);
+			content_bytes = readBinaryFile(ressource_path);
+			ressource_content = reinterpret_cast<unsigned char *>(&content_bytes[0]);
 			headers["Content-Type"] = _getMIMEType(ressource_path);
-			return (_generateResponse(200, headers, ressource_content));
+			return (_generateResponse(200, headers, ressource_content, content_bytes.size()));
 		}
 		catch (const std::exception &e)
 		{
@@ -94,15 +98,16 @@ std::string RequestInterpretor::_get(void)
  * Creates a HTTP response based on given code and content
  * @param code the status code of the response
  * @param headers headers to inject in response
- * @param content an char array of the content to send
+ * @param content an unsigned char array of the content to send
+ * @param size the size in bytes of the content
  * @return the string representation of a HTTP response
  */
-std::string RequestInterpretor::_generateResponse(size_t code, std::map<std::string, std::string> headers, std::string content)
+std::string RequestInterpretor::_generateResponse(size_t code, std::map<std::string, std::string> headers, const unsigned char *content, size_t content_size)
 {
 	std::string response;
 	std::map<std::string, std::string>::iterator it;
 
-	headers["Content-Length"] = uIntegerToString(content.size());
+	headers["Content-Length"] = uIntegerToString(content_size);
 	headers["Server"] = "webserv";
 	response += "HTTP/1.1 ";
 	response += uIntegerToString(code) + " ";
@@ -114,8 +119,21 @@ std::string RequestInterpretor::_generateResponse(size_t code, std::map<std::str
 		++it;
 	}
 	response += "\n";
-	response += content;
+	for (size_t i = 0; i < content_size; ++i)
+		response += content[i];
 	return (response);
+}
+
+/**
+ * Creates a HTTP response based on given code and ASCII content
+ * @param code the status code of the response
+ * @param headers headers to inject in response
+ * @param content the string representation of the content
+ * @return the string representation of a HTTP response
+ */
+std::string RequestInterpretor::_generateResponse(size_t code, std::map<std::string, std::string> headers, std::string content)
+{
+	return (_generateResponse(code, headers, reinterpret_cast<const unsigned char *>(content.c_str()), content.size()));
 }
 
 /**
@@ -298,4 +316,18 @@ std::string RequestInterpretor::_getMIMEType(std::string filename)
 	if (m.count(ext))
 		return (m[ext]);
 	return ("application/octet-stream");
+}
+
+/**
+ * Get the right location in configuration based on the asked ressource
+ * @param ressource the asked ressource
+ * @return the location configuration object
+ * @example ressource "/" in configurations "/wordpress", "/upload" and "/" will return "/"
+ * @example ressource "/wordpress/index.php" in configurations "/wordpress", "/upload" and "/" will return "/wordpress"
+ * @todo implement the function
+ */
+Configuration::location RequestInterpretor::_getLocation(std::string ressource)
+{
+	(void)ressource;
+	return (_conf.locations[0]);
 }

@@ -60,7 +60,7 @@ int treat(int sd, char *buffer)
 
 	l.root = "/Users/tom/Documents/www/";
 	l.index = "index.html";
-	l.autoindex = true;
+	l.autoindex = false;
 	s.locations.push_back(l);
 	std::string response = RequestInterpretor(std::string(buffer), s).getResponse();
     int rc = send(sd, response.c_str(), response.size(), 0);

@@ -89,6 +89,40 @@ std::string readFile(std::string file)
 }
 
 /**
+* Reads a file into a std::vector of unsigned char
+* @throw ParsingException if the file does not exists
+* @param file the file to read
+* @return a string containing the file content
+*/
+std::vector<unsigned char> readBinaryFile(std::string file)
+{
+	char buffer[BUFFER_SIZE + 1] = {0};
+	int fd;
+	int i;
+	int res;
+	std::vector<unsigned char> result;
+
+	fd = open(file.c_str(), O_RDONLY);
+	if (fd < -1)
+	{
+		std::cout << "Error" << std::endl;
+		throw ParsingException(0, "The file " + file + " does not exists.");
+	}
+	while ((res = read(fd, buffer, BUFFER_SIZE)) > 0)
+	{
+		for (size_t j = 0; j < (size_t)res; ++j)
+			result.push_back(buffer[j]);
+		i = 0;
+		while (i < BUFFER_SIZE)
+			buffer[i++] = 0;
+	}
+	if (res < 0)
+		throw ParsingException(0, "Error while reading " + file + ".");
+	close(fd);
+	return (result);
+}
+
+/**
 * Get the n-th line of source, without whitespaces before and after
 * @param source the config string
 * @param n the wanted line
