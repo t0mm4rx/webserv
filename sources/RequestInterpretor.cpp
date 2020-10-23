@@ -231,7 +231,7 @@ std::string RequestInterpretor::_getListingHTMLPage(std::string path, std::strin
 	base = readFile("./assets/listing.html");
 	base = replace(base, "$1", ressource);
 	dr = opendir(path.c_str());
-	while ((en = readdir(dr)) != nullptr)
+	while ((en = readdir(dr)) != 0)
 		listing += "<li><a href=\"" + ressource + "/" + std::string(en->d_name) +  "\">" + std::string(en->d_name) + "/</a></li>";
 	closedir(dr);
 	base = replace(base, "$2", listing);
