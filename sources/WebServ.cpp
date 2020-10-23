@@ -57,11 +57,21 @@ int treat(int sd, char *buffer)
 {
 	Configuration::server s;
 	Configuration::location l;
+	Configuration::location l1;
+	Configuration::location l2;
 
 	l.root = "/Users/tom/Documents/www/";
 	l.index = "index.html";
 	l.autoindex = false;
+	l.name = "/";
+
+	l1.name = "/wordpress";
+	l1.root = "/Users/tom/Documents/www/";
+	l1.index = "a";
+	l2.name = "/upload";
 	s.locations.push_back(l);
+	s.locations.push_back(l1);
+	s.locations.push_back(l2);
 	std::string response = RequestInterpretor(std::string(buffer), s).getResponse();
     int rc = send(sd, response.c_str(), response.size(), 0);
     if (rc < 0)

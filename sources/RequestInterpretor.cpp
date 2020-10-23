@@ -11,6 +11,8 @@ RequestInterpretor::RequestInterpretor(std::string request, Configuration::serve
 {
 	this->_ressource = splitWhitespace(getLine(request, 0))[1];
 	this->_location = _getLocation(_ressource);
+	this->_ressource.replace(0, this->_location.name.size(), "/");
+	DEBUG("location: " + this->_location.name);
 }
 
 RequestInterpretor::RequestInterpretor(const RequestInterpretor &other)
@@ -33,32 +35,36 @@ RequestInterpretor &RequestInterpretor::operator=(const RequestInterpretor &othe
 /**
  * Get the HTTP request for the given request
  * @return a string representing the HTTP response
+ * @todo implement the case when the method isn't correct
  */
 std::string RequestInterpretor::getResponse(void)
 {
 	std::string method = "GET";
+	std::string ressource_path;
+
+	ressource_path = _location.root;
+	if (ressource_path[ressource_path.size() - 1] == '/')
+		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
+	ressource_path += _ressource;
+	DEBUG("ressource path: " + ressource_path);
 	if (method == "GET")
-		return _get();
+		return _get(ressource_path);
 	return ("");
 }
 
 /**
  * Performs a GET request
+ * @param ressource_path the path of the ressource to GET on the disk
  * @return the string representation of the HTTP response
  */
-std::string RequestInterpretor::_get(void)
+std::string RequestInterpretor::_get(std::string ressource_path)
 {
 	std::map<std::string, std::string> headers;
-	std::string ressource_path;
 	std::vector<unsigned char> content_bytes;
 	unsigned char *ressource_content;
 	int ressource_type;
 
 	headers["Content-Type"] = _getMIMEType(".html");
-	ressource_path = _location.root;
-	if (ressource_path[ressource_path.size() - 1] == '/')
-		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
-	ressource_path += _ressource;
 	ressource_type = pathType(ressource_path);
 	if (ressource_type == 0)
 		return (_generateResponse(404, headers, _getErrorHTMLPage(404)));
@@ -324,10 +330,29 @@ std::string RequestInterpretor::_getMIMEType(std::string filename)
  * @return the location configuration object
  * @example ressource "/" in configurations "/wordpress", "/upload" and "/" will return "/"
  * @example ressource "/wordpress/index.php" in configurations "/wordpress", "/upload" and "/" will return "/wordpress"
- * @todo implement the function
  */
 Configuration::location RequestInterpretor::_getLocation(std::string ressource)
 {
-	(void)ressource;
-	return (_conf.locations[0]);
+	size_t max_length;
+	size_t max_index;
+
+	for (size_t i = 0; i < _conf.locations.size(); ++i)
+	{
+		if (_conf.locations[i].name == ressource)
+			return (_conf.locations[i]);
+	}
+	max_length = 0;
+	max_index = 0;
+	for (size_t i = 0; i < _conf.locations.size(); ++i)
+	{
+		if (ressource.rfind(_conf.locations[i].name, 0) == 0)
+		{
+			if (_conf.locations[i].name.size() > max_length)
+			{
+				max_length = _conf.locations[i].name.size();
+				max_index = i;
+			}
+		}
+	}
+	return (_conf.locations[max_index]);
 }
