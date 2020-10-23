@@ -60,7 +60,7 @@ bool boolParam(std::string param, size_t line);
 bool isMethodValid(std::string method);
 std::string uIntegerToString(size_t value);
 std::string replace(std::string source, std::string to_replace, std::string new_value);
-int pathType(std::string path);
+int pathType(std::string path, time_t *file_date);
 
 class ParsingException : public std::exception
 {

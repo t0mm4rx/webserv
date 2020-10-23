@@ -5,6 +5,9 @@
 # include <string>
 # include <map>
 # include <dirent.h>
+# include <time.h>
+# include <sys/time.h>
+# include <stdio.h>
 # include "Configuration.hpp"
 # include "parsing.hpp"
 # include "WebServ.hpp"
@@ -23,6 +26,8 @@ class RequestInterpretor
 		std::string _getErrorHTMLPage(size_t code);
 		std::string _getListingHTMLPage(std::string path, std::string ressource);
 		std::string _getMIMEType(std::string filename);
+		std::string _getDateHeader(void);
+		std::string _formatTimestamp(time_t timestamp);
 		Configuration::location _getLocation(std::string ressource);
 	public:
 		RequestInterpretor(std::string req = "", Configuration::server serverConf = Configuration::server());

@@ -63,14 +63,16 @@ std::string RequestInterpretor::_get(std::string ressource_path)
 	std::vector<unsigned char> content_bytes;
 	unsigned char *ressource_content;
 	int ressource_type;
+	time_t file_date;
 
 	headers["Content-Type"] = _getMIMEType(".html");
-	ressource_type = pathType(ressource_path);
+	headers["Date"] = _getDateHeader();
+	ressource_type = pathType(ressource_path, &file_date);
 	if (ressource_type == 0)
 		return (_generateResponse(404, headers, _getErrorHTMLPage(404)));
 	if (ressource_type == 2)
 	{
-		if (pathType(ressource_path + _location.index) == 1)
+		if (pathType(ressource_path + _location.index, NULL) == 1)
 		{
 			ressource_path = ressource_path + _location.index;
 			ressource_type = 1;
@@ -90,6 +92,7 @@ std::string RequestInterpretor::_get(std::string ressource_path)
 			content_bytes = readBinaryFile(ressource_path);
 			ressource_content = reinterpret_cast<unsigned char *>(&content_bytes[0]);
 			headers["Content-Type"] = _getMIMEType(ressource_path);
+			headers["Last-Modified"] = _formatTimestamp(file_date);
 			return (_generateResponse(200, headers, ressource_content, content_bytes.size()));
 		}
 		catch (const std::exception &e)
@@ -355,4 +358,33 @@ Configuration::location RequestInterpretor::_getLocation(std::string ressource)
 		}
 	}
 	return (_conf.locations[max_index]);
+}
+
+/**
+ * Get the current HTTP formatted date
+ * @return a string representing the current date formatted for HTTP header
+ */
+std::string RequestInterpretor::_getDateHeader(void)
+{
+	struct timeval now;
+
+	gettimeofday(&now, NULL);
+	return (_formatTimestamp(now.tv_sec));
+}
+
+/**
+ * Format a timestamp to a HTTP formatted date
+ * @param timestamp the timestamp in second of the date
+ * @return a string representation of the date according to HTTP standard
+ */
+std::string RequestInterpretor::_formatTimestamp(time_t timestamp)
+{
+	char buffer[33];
+	struct tm *ts;
+	size_t last;
+
+	ts   = localtime(&timestamp);
+	last = strftime(buffer, 32, "%a, %d %b %Y %T GMT", ts);
+	buffer[last] = '\0';
+	return (std::string(buffer));
 }
