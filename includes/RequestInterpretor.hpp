@@ -19,7 +19,7 @@ class RequestInterpretor
 		std::string _ressource;
 		Configuration::server _conf;
 		Configuration::location _location;
-		std::string _get(std::string ressource_path);
+		std::string _get(std::string ressource_path, bool send_body=true);
 		std::string _head(std::string ressource_path);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, std::string content);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, const unsigned char *content, size_t content_size);

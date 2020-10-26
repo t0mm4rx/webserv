@@ -49,6 +49,8 @@ std::string RequestInterpretor::getResponse(void)
 	DEBUG("ressource path: " + ressource_path);
 	if (method == "GET")
 		return _get(ressource_path);
+	if (method == "HEAD")
+		return _head(ressource_path);
 	return ("");
 }
 
@@ -57,7 +59,7 @@ std::string RequestInterpretor::getResponse(void)
  * @param ressource_path the path of the ressource to GET on the disk
  * @return the string representation of the HTTP response
  */
-std::string RequestInterpretor::_get(std::string ressource_path)
+std::string RequestInterpretor::_get(std::string ressource_path, bool send_body)
 {
 	std::map<std::string, std::string> headers;
 	std::vector<unsigned char> content_bytes;
@@ -69,7 +71,7 @@ std::string RequestInterpretor::_get(std::string ressource_path)
 	headers["Date"] = _getDateHeader();
 	ressource_type = pathType(ressource_path, &file_date);
 	if (ressource_type == 0)
-		return (_generateResponse(404, headers, _getErrorHTMLPage(404)));
+		return (_generateResponse(404, headers, send_body ? _getErrorHTMLPage(404) : ""));
 	if (ressource_type == 2)
 	{
 		if (pathType(ressource_path + _location.index, NULL) == 1)
@@ -80,9 +82,9 @@ std::string RequestInterpretor::_get(std::string ressource_path)
 		else
 		{
 			if (_location.autoindex)
-				return (_generateResponse(200, headers, _getListingHTMLPage(ressource_path, _ressource)));
+				return (_generateResponse(200, headers, send_body ? _getListingHTMLPage(ressource_path, _ressource) : ""));
 			else
-				return (_generateResponse(403, headers, _getErrorHTMLPage(403)));
+				return (_generateResponse(403, headers, send_body ? _getErrorHTMLPage(403) : ""));
 		}
 	}
 	if (ressource_type == 1)
@@ -94,14 +96,26 @@ std::string RequestInterpretor::_get(std::string ressource_path)
 			headers["Content-Type"] = _getMIMEType(ressource_path);
 			pathType(ressource_path, &file_date);
 			headers["Last-Modified"] = _formatTimestamp(file_date);
-			return (_generateResponse(200, headers, ressource_content, content_bytes.size()));
+			if (send_body)
+				return (_generateResponse(200, headers, ressource_content, content_bytes.size()));
+			return (_generateResponse(200, headers, ""));
 		}
 		catch (const std::exception &e)
 		{
-			return (_generateResponse(403, headers, _getErrorHTMLPage(403)));
+			return (_generateResponse(403, headers, send_body ? _getErrorHTMLPage(403) : ""));
 		}
 	}
-	return (_generateResponse(500, headers, _getErrorHTMLPage(500)));
+	return (_generateResponse(500, headers, send_body ? _getErrorHTMLPage(500) : ""));
+}
+
+/**
+ * Performs a HEAD request
+ * @param ressource_path the path of the ressource to GET on the disk
+ * @return the string representation of the HTTP response
+ */
+std::string RequestInterpretor::_head(std::string ressource_path)
+{
+	return (_get(ressource_path, false));
 }
 
 /**
