@@ -100,9 +100,8 @@ void Configuration::_parseServerProperty(std::string source, size_t n, server &s
 	}
 	if (line[0] == server_properties[1])
 	{
-		if (line.size() != 2)
-			throw ParsingException(n, std::string(server_properties[1]) + " <name>;");
-		s.name = line[1];
+		for (size_t i = 0; i < line.size(); ++i)
+			s.names.push_back(line[i]);
 	}
 	if (line[0] == server_properties[2])
 	{
@@ -203,7 +202,10 @@ void Configuration::print(void)
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		std::cout << "- Server" << std::endl;
-		std::cout << "   * server_name: " + _servers[i].name << std::endl;
+		std::cout << "   * server_name: ";
+		for (size_t j = 0; j < _servers[i].names.size(); ++j)
+			std::cout << _servers[i].names[j] << " ";
+		std::cout << std::endl;
 		std::cout << "   * host: " + _servers[i].host << std::endl;
 		std::cout << "   * port: " + uIntegerToString(_servers[i].port) << std::endl;
 		std::cout << "   * client_max_body_size: " + uIntegerToString(_servers[i].client_max_body_size) << std::endl;
@@ -262,7 +264,6 @@ Configuration::server Configuration::_defaultServer(void)
 {
 	server s;
 
-	s.name = "localhost";
 	s.port = 80;
 	s.host = "127.0.0.1";
 	s.error_pages[405] = "./assets/405.html";
