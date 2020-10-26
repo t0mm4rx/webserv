@@ -64,6 +64,8 @@ int treat(int sd, char *buffer)
 	l.index = "index.html";
 	l.autoindex = false;
 	l.name = "/";
+	l.methods.push_back("GET");
+	l.methods.push_back("HEAD");
 
 	l1.name = "/wordpress";
 	l1.root = "/Users/tom/Documents/www/";

@@ -42,6 +42,8 @@ std::string RequestInterpretor::getResponse(void)
 	std::string method = "GET";
 	std::string ressource_path;
 
+	if (!_isMethodAllowed(method))
+		return (_wrongMethod());
 	ressource_path = _location.root;
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
@@ -116,6 +118,25 @@ std::string RequestInterpretor::_get(std::string ressource_path, bool send_body)
 std::string RequestInterpretor::_head(std::string ressource_path)
 {
 	return (_get(ressource_path, false));
+}
+
+/**
+ * Returns a 405 response in case of not allowed method
+ * @return the string representation of the HTTP response
+ */
+std::string RequestInterpretor::_wrongMethod(void)
+{
+	std::map<std::string, std::string> headers;
+	std::string allowed;
+
+	for (size_t i = 0; i < _location.methods.size(); ++i)
+	{
+		allowed += _location.methods[i];
+		if (i < _location.methods.size() - 1)
+			allowed += ", ";
+	}
+	headers["Allow"] = allowed;
+	return (_generateResponse(405, headers, _getErrorHTMLPage(405)));
 }
 
 /**
@@ -403,4 +424,19 @@ std::string RequestInterpretor::_formatTimestamp(time_t timestamp)
 	last = strftime(buffer, 32, "%a, %d %b %Y %T GMT", ts);
 	buffer[last] = '\0';
 	return (std::string(buffer));
+}
+
+/**
+ * Is a method available on current location
+ * @param method the HTTP method
+ * @return wether the method is accepted on this location or not
+ */
+bool RequestInterpretor::_isMethodAllowed(std::string method)
+{
+	for (size_t i = 0; i < _location.methods.size(); ++i)
+	{
+		if (_location.methods[i] == method)
+			return (true);
+	}
+	return (false);
 }

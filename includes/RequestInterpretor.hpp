@@ -21,6 +21,7 @@ class RequestInterpretor
 		Configuration::location _location;
 		std::string _get(std::string ressource_path, bool send_body=true);
 		std::string _head(std::string ressource_path);
+		std::string _wrongMethod(void);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, std::string content);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, const unsigned char *content, size_t content_size);
 		std::string _getStatusDescription(size_t code);
@@ -30,6 +31,7 @@ class RequestInterpretor
 		std::string _getDateHeader(void);
 		std::string _formatTimestamp(time_t timestamp);
 		Configuration::location _getLocation(std::string ressource);
+		bool _isMethodAllowed(std::string method);
 	public:
 		RequestInterpretor(std::string req = "", Configuration::server serverConf = Configuration::server());
 		RequestInterpretor(const RequestInterpretor &other);
