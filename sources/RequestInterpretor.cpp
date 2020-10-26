@@ -7,15 +7,19 @@
  * @todo Add the HTTP request parsing here
  */
 RequestInterpretor::RequestInterpretor(std::string request, Configuration::server serverConf)
-: _request(request), _conf(serverConf)
+: _request(request), _header_block(HeadersBlock(const_cast<const std::string &>(request))), _conf(serverConf)
 {
-	this->_ressource = splitWhitespace(getLine(request, 0))[1];
+	// this->_header_block = ;
+	if (this->_header_block.isRequest())
+		this->_ressource = this->_header_block.getRequestLine()._request_target;
+	// this->_ressource = splitWhitespace(getLine(request, 0))[1];
 	this->_location = _getLocation(_ressource);
 	this->_ressource.replace(0, this->_location.name.size(), "/");
 	DEBUG("location: " + this->_location.name);
 }
 
 RequestInterpretor::RequestInterpretor(const RequestInterpretor &other)
+: _header_block(other._header_block)
 {
 	*this = other;
 }
@@ -25,6 +29,7 @@ RequestInterpretor::~RequestInterpretor(void)
 
 RequestInterpretor &RequestInterpretor::operator=(const RequestInterpretor &other)
 {
+	this->_header_block = other._header_block;
 	this->_ressource = other._ressource;
 	this->_request = other._request;
 	this->_conf = other._conf;
@@ -39,7 +44,7 @@ RequestInterpretor &RequestInterpretor::operator=(const RequestInterpretor &othe
  */
 std::string RequestInterpretor::getResponse(void)
 {
-	std::string method = "GET";
+	std::string method = _header_block.getRequestLine()._method;
 	std::string ressource_path;
 
 	if (!_isMethodAllowed(method))
