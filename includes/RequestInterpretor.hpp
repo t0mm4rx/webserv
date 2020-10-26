@@ -34,6 +34,7 @@ class RequestInterpretor
 		std::string _formatTimestamp(time_t timestamp);
 		Configuration::location _getLocation(std::string ressource);
 		bool _isMethodAllowed(std::string method);
+		std::string _formatRessource(std::string ressource);
 	public:
 		RequestInterpretor(std::string req = "", Configuration::server serverConf = Configuration::server());
 		RequestInterpretor(const RequestInterpretor &other);
