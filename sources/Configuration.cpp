@@ -100,7 +100,7 @@ void Configuration::_parseServerProperty(std::string source, size_t n, server &s
 	}
 	if (line[0] == server_properties[1])
 	{
-		for (size_t i = 0; i < line.size(); ++i)
+		for (size_t i = 1; i < line.size(); ++i)
 			s.names.push_back(line[i]);
 	}
 	if (line[0] == server_properties[2])
@@ -202,6 +202,7 @@ void Configuration::print(void)
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		std::cout << "- Server" << std::endl;
+		std::cout << _servers[i].names.size() << std::endl;
 		std::cout << "   * server_name: ";
 		for (size_t j = 0; j < _servers[i].names.size(); ++j)
 			std::cout << _servers[i].names[j] << " ";
