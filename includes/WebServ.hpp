@@ -24,6 +24,7 @@
 #include <exception>
 #include <iostream>
 #include <sstream>
+#include "Configuration.hpp"
 
 class throwMessage : public std::exception {
     private:
@@ -58,7 +59,7 @@ class throwMessageErrno : public std::exception {
 void throwError(const std::exception& ex);
 void outError(const std::string& msg);
 
-int treat(int sd, char *buffer);
+int treat(int sd, char *buffer, Configuration::server server_conf);
 
 
 #endif

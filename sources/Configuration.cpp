@@ -226,7 +226,7 @@ void Configuration::print(void)
 			std::cout << "     * root: " << it2->root << std::endl;
 			std::cout << "     * cgi_extension: ";
 			for (size_t j = 0; j < it2->cgi_extension.size(); ++j)
-				std::cout << it2->cgi_extension[i] << " ";
+				std::cout << it2->cgi_extension[j] << " ";
 			std::cout << std::endl;
 			std::cout << "     * cgi_path: " << it2->cgi_path << std::endl;
 			std::cout << "     * autoindex: " << it2->autoindex << std::endl;

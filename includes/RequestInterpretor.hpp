@@ -11,12 +11,14 @@
 # include "Configuration.hpp"
 # include "parsing.hpp"
 # include "WebServ.hpp"
+# include "HeadersBlock.hpp"
 
 class RequestInterpretor
 {
 	private:
 		std::string _request;
 		std::string _ressource;
+		HeadersBlock _header_block;
 		Configuration::server _conf;
 		Configuration::location _location;
 		std::string _get(std::string ressource_path, bool send_body=true);

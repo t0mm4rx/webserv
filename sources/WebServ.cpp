@@ -72,28 +72,9 @@ int main(int argc, char **argv)
     return (0);
 }
 
-int treat(int sd, char *buffer)
+int treat(int sd, char *buffer, Configuration::server server_conf)
 {
-	Configuration::server s;
-	Configuration::location l;
-	Configuration::location l1;
-	Configuration::location l2;
-
-	l.root = "/var/www/html/";
-	l.index = "index.html";
-	l.autoindex = false;
-	l.name = "/";
-	l.methods.push_back("GET");
-	l.methods.push_back("HEAD");
-
-	l1.name = "/wordpress";
-	l1.root = "/var/www/";
-	l1.index = "a";
-	l2.name = "/upload";
-	s.locations.push_back(l);
-	s.locations.push_back(l1);
-	s.locations.push_back(l2);
-	std::string response = RequestInterpretor(std::string(buffer), s).getResponse();
+	std::string response = RequestInterpretor(std::string(buffer), server_conf).getResponse();
     int rc = send(sd, response.c_str(), response.size(), 0);
     if (rc < 0)
     {
