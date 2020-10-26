@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/24 23:09:42 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/26 12:20:53 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
         for (int i = 0; i < (int)test.getServers().size(); i++)
         {
             Socket *exist = NULL;
-            for (int j = 0; j < sm.getSockets().size(); j++)
+            for (size_t j = 0; j < sm.getSockets().size(); j++)
                 if (sm.getSockets()[j]->getServerConfiguration().port == test.getServers()[i].port)
                     exist = sm.getSockets()[j];
             if (exist == NULL)
@@ -79,7 +79,7 @@ int treat(int sd, char *buffer)
 	Configuration::location l1;
 	Configuration::location l2;
 
-	l.root = "/Users/tom/Documents/www/";
+	l.root = "/var/www/html/";
 	l.index = "index.html";
 	l.autoindex = false;
 	l.name = "/";
@@ -87,7 +87,7 @@ int treat(int sd, char *buffer)
 	l.methods.push_back("HEAD");
 
 	l1.name = "/wordpress";
-	l1.root = "/Users/tom/Documents/www/";
+	l1.root = "/var/www/";
 	l1.index = "a";
 	l2.name = "/upload";
 	s.locations.push_back(l);

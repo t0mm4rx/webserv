@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:38:43 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/24 22:49:55 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/26 12:13:48 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ Socket::Socket(const struct Configuration::server& server)
 :
 	_server_config(server)
 {
-	std::cout << "Server Name = [" << this->_server_config.name << "]" << std::endl;
+	// std::cout << "Server Name = [" << this->_server_config.names << "]" << std::endl;
 	try
 	{
 		this->createSocketDescriptor();
