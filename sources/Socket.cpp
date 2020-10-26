@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:38:43 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 23:50:19 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/24 22:49:55 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,10 @@ void Socket::socketListener(void)
  *  @param config the config of the socket.
  */
 Socket::Socket(const struct Configuration::server& server)
+:
+	_server_config(server)
 {
+	std::cout << "Server Name = [" << this->_server_config.name << "]" << std::endl;
 	try
 	{
 		this->createSocketDescriptor();
@@ -131,6 +134,17 @@ Socket::Socket(const struct Configuration::server& server)
 	}
 }
 
+Socket::Socket(int sd, const struct Configuration::server& server)
+:
+	_sd(sd),
+	_server_config(server)
+{}
+
+Socket::Socket(int sd)
+:
+	_sd(sd)
+{}
+
 /**
  * 	@brief Copy another socket.
  * 
@@ -140,7 +154,8 @@ Socket::Socket(const Socket& copy)
 :
 	_sd(copy._sd),
 	_option_buffer(copy._option_buffer),
-	_address(copy._address)
+	_address(copy._address),
+	_server_config(copy._server_config)
 {}
 
 Socket::~Socket()
@@ -153,6 +168,7 @@ Socket &Socket::operator=(const Socket& op)
 	this->_sd = op._sd;
 	this->_option_buffer = op._option_buffer;
 	this->_address = op._address;
+	this->_server_config = op._server_config;
 	return (*this);
 }
 
@@ -162,4 +178,9 @@ Socket &Socket::operator=(const Socket& op)
 int Socket::getSocketDescriptor(void)
 {
 	return (this->_sd);
+}
+
+struct Configuration::server	Socket::getServerConfiguration(void)
+{
+	return (this->_server_config);
 }

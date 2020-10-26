@@ -6,10 +6,11 @@ NAME = WebServ
 SOURCES_FOLDER = sources/
 SOURCES =	WebServ.cpp \
 			Socket.cpp \
-			SocketManager.cpp \
+			SubSocket.cpp \
 			Server.cpp \
 			Configuration.cpp \
 			RequestInterpretor.cpp \
+			HeadersBlock.cpp \
 			parsing.cpp \
 			Error.cpp
 #===============================================================================
@@ -18,8 +19,10 @@ SOURCES =	WebServ.cpp \
 INCLUDES_FOLDER = includes/
 INCLUDES = 	WebServ.hpp \
 			Socket.hpp \
+			SubSocket.hpp \
 			Server.hpp \
 			Configuration.hpp \
+			HeadersBlock.hpp \
 			parsing.hpp \
 			SocketManager.hpp
 
@@ -34,7 +37,7 @@ OBJECTS = $(addprefix $(OBJECTS_FOLDER), $(OBJECT))
 #===============================================================================
 
 # FLAGS ========================================================================
-FLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address -std=c++98
+FLAGS = -Wall -Wextra -Werror -std=c++98
 #===============================================================================
 
 DEBUG_VALUE = 0

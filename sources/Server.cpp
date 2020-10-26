@@ -6,14 +6,14 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 20:45:37 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/24 22:06:15 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Server.hpp"
 
 //WIP
-Server::Server(SocketManager sm)
+Server::Server(SocketManager<Socket> sm)
 :
     _sm(sm)
 {}
@@ -60,7 +60,7 @@ int Server::waitConnection(fd_set *working_set, int max_sd)
  *      (listener + opened socket with clients).
  *  @return new number of maximum sockets descriptor.
  */
-int Server::acceptConnection(int sd, int max_sd, fd_set *master_set)
+int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManager<SubSocket>& sub_sm)
 {
     int new_sd = 0;
 
@@ -76,6 +76,9 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set)
         }
         
         DEBUG("New connection added")
+        std::cout << "NAME = [" << this->_sm.getBySD(sd).getServerConfiguration().name << "]" << std::endl;
+        std::cout << "SD = " << sd << std::endl;
+        sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), new_sd));
         FD_SET(new_sd, master_set);
         if (new_sd > max_sd)
             max_sd = new_sd;
@@ -135,6 +138,7 @@ void Server::loop()
     fd_set  master_set;
     int     socket_ready;
     int     max_sd;
+    SocketManager<SubSocket> sub_sm;
 
     master_set = this->_sm.getSDSet();
     max_sd = this->_sm.getLastSD();
@@ -149,15 +153,34 @@ void Server::loop()
                 {
                     socket_ready--;
                     if (this->_sm.hasSD(i))
-                        max_sd = this->acceptConnection(i, max_sd, &master_set);
+                    {
+                        max_sd = this->acceptConnection(i, max_sd, &master_set, sub_sm);
+                        // std::cout << "SUB LIST : " << std::endl;
+                        // for (size_t i = 0; i < sub_sm.getSockets().size(); i++)
+                        //     std::cout << "SUB = " << sub_sm.getSockets()[i]->getSocketDescriptor() << std::endl;
+                    }
                     else
                     {
                         char buffer[40000];
                         bzero(buffer, 40000);
                         if (this->receiveConnection(i, buffer, 40000) < 0)
                             max_sd = this->closeConnection(i, max_sd, &master_set);
-                        else                        
-                            treat(i, buffer);  //Temporary
+                        else
+                        {
+                            try
+                            {
+                                HeadersBlock test(buffer);
+                                // std::cout << test;
+                                SubSocket plop = sub_sm.getBySD(i);
+                                std::cout << "SOCKET = " << plop.getSocketDescriptor() << " | PARENT = " << plop.getParent().getSocketDescriptor() << std::endl;
+                                std::cout << "Server Name = " <<  plop.getParent().getServerConfiguration().name << std::endl;
+                                treat(i, buffer);  //Temporary
+                            }
+                            catch (const std::exception& e)
+                            {
+                                throwError(e);
+                            }
+                        }
                     }
                 }
         }

@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:34:20 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 23:50:06 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/24 22:50:32 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <arpa/inet.h>
 #include <netinet/in.h>
-#include <fcntl.h> 
+#include <fcntl.h>
 
 # include "WebServ.hpp"
 # include "Configuration.hpp"
@@ -26,10 +27,13 @@
 
 class Socket
 {
+	protected:
+		int								_sd;
+
 	private:
-		int					_sd;
-		int					_option_buffer;
-		struct sockaddr_in	_address;
+		int								_option_buffer;
+		struct sockaddr_in				_address;
+		struct Configuration::server	_server_config;
 
 		void	createSocketDescriptor(void);
 		void	setSocketOptions(void);
@@ -40,11 +44,14 @@ class Socket
 	
 	public:
 		Socket(const struct Configuration::server& server);
+		Socket(int sd, const struct Configuration::server& server);
+		Socket(int sd);
 		Socket(const Socket& copy);
 		virtual ~Socket();
 		Socket &operator=(const Socket& op);
 
-		int					getSocketDescriptor(void);
+		int								getSocketDescriptor(void);
+		struct Configuration::server	getServerConfiguration(void);
 };
 
 #endif

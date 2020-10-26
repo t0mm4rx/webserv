@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:24:51 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 18:06:16 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/24 18:59:42 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,21 @@
 # define SERVER_HPP
 
 #include "SocketManager.hpp"
+#include "HeadersBlock.hpp"
 #include <unistd.h>
 
 class Server
 {
     private:
-        SocketManager   _sm;
+        SocketManager<Socket>   _sm;
 
         int     waitConnection(fd_set *working_set, int max_sd);
-        int     acceptConnection(int sd, int max_sd, fd_set *master_set);
+        int     acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManager<SubSocket> &sub_sm);
         int     receiveConnection(int sd, char *buffer, int buffer_size);
         int     closeConnection(int sd, int max_sd, fd_set *master_set);
 
     public:
-        Server(SocketManager sm);
+        Server(SocketManager<Socket> sm);
         Server(const Server& copy);
         ~Server();
         Server &operator=(const Server& op);
