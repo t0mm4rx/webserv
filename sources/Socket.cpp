@@ -42,7 +42,7 @@ void Socket::createSocketDescriptor(void)
 void Socket::setSocketOptions(void)
 {
 	DEBUG("Set socket options...")
-	if (setsockopt(this->_sd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, 
+	if (setsockopt(this->_sd, SOL_SOCKET, SO_REUSEADDR/* | SO_REUSEPORT*/,
 		&this->_option_buffer, sizeof(this->_option_buffer)))
 		throw(
 			throwMessageErrno("Set option of a socket")

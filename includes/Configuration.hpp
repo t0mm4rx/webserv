@@ -25,7 +25,7 @@ class Configuration
 		};
 		struct server
 		{
-			std::string name;
+			std::vector<std::string> names;
 			std::string host;
 			std::map<int, std::string> error_pages;
 			std::vector<location> locations;

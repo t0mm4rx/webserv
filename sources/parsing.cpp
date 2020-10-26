@@ -89,6 +89,40 @@ std::string readFile(std::string file)
 }
 
 /**
+* Reads a file into a std::vector of unsigned char
+* @throw ParsingException if the file does not exists
+* @param file the file to read
+* @return a string containing the file content
+*/
+std::vector<unsigned char> readBinaryFile(std::string file)
+{
+	char buffer[BUFFER_SIZE + 1] = {0};
+	int fd;
+	int i;
+	int res;
+	std::vector<unsigned char> result;
+
+	fd = open(file.c_str(), O_RDONLY);
+	if (fd < -1)
+	{
+		std::cout << "Error" << std::endl;
+		throw ParsingException(0, "The file " + file + " does not exists.");
+	}
+	while ((res = read(fd, buffer, BUFFER_SIZE)) > 0)
+	{
+		for (size_t j = 0; j < (size_t)res; ++j)
+			result.push_back(buffer[j]);
+		i = 0;
+		while (i < BUFFER_SIZE)
+			buffer[i++] = 0;
+	}
+	if (res < 0)
+		throw ParsingException(0, "Error while reading " + file + ".");
+	close(fd);
+	return (result);
+}
+
+/**
 * Get the n-th line of source, without whitespaces before and after
 * @param source the config string
 * @param n the wanted line
@@ -299,4 +333,46 @@ std::string uIntegerToString(size_t n)
 
 	convert << n;
 	return (convert.str());
+}
+
+/**
+ * Replace all occurences in a std::string
+ * @param source the string to replace from
+ * @param to_replace the string to replace
+ * @param new_value the value to replace by
+ * @return the processed string
+ */
+std::string replace(std::string source, std::string to_replace, std::string new_value) {
+	size_t start_pos = 0;
+	while((start_pos = source.find(to_replace, start_pos)) != std::string::npos) {
+		source.replace(start_pos, to_replace.length(), new_value);
+		start_pos += new_value.length();
+	}
+	return (source);
+}
+
+/**
+ * Check if a path is non-existent, a file, or a directory, and get its last-modified date
+ * @param path the path to check
+ * @param file_date a time_t value that will be set to the date of modification of the file
+ * @return 0 if the path is non-existant, 1 if the path is a file, 2 if the path is a directory
+ */
+int pathType(std::string path, time_t *file_date)
+{
+	struct stat buffer;
+	struct timezone tz;
+
+	gettimeofday(NULL, &tz);
+	int exist = stat(path.c_str(), &buffer);
+	if (file_date)
+		*file_date = buffer.st_mtime + tz.tz_minuteswest * 60;
+	if (exist == 0)
+	{
+		if (S_ISREG(buffer.st_mode))
+			return (1);
+		else
+			return (2);
+	}
+	else
+		return (0);
 }

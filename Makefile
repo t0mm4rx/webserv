@@ -9,6 +9,7 @@ SOURCES =	WebServ.cpp \
 			SubSocket.cpp \
 			Server.cpp \
 			Configuration.cpp \
+			RequestInterpretor.cpp \
 			HeadersBlock.cpp \
 			parsing.cpp \
 			Error.cpp
