@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/24 22:06:15 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/26 12:14:14 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
         }
         
         DEBUG("New connection added")
-        std::cout << "NAME = [" << this->_sm.getBySD(sd).getServerConfiguration().name << "]" << std::endl;
+        // std::cout << "NAME = [" << this->_sm.getBySD(sd).getServerConfiguration().name << "]" << std::endl;
         std::cout << "SD = " << sd << std::endl;
         sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), new_sd));
         FD_SET(new_sd, master_set);
@@ -173,7 +173,7 @@ void Server::loop()
                                 // std::cout << test;
                                 SubSocket plop = sub_sm.getBySD(i);
                                 std::cout << "SOCKET = " << plop.getSocketDescriptor() << " | PARENT = " << plop.getParent().getSocketDescriptor() << std::endl;
-                                std::cout << "Server Name = " <<  plop.getParent().getServerConfiguration().name << std::endl;
+                                // std::cout << "Server Name = " <<  plop.getParent().getServerConfiguration().name << std::endl;
                                 treat(i, buffer);  //Temporary
                             }
                             catch (const std::exception& e)
