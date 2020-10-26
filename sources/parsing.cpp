@@ -361,8 +361,9 @@ int pathType(std::string path, time_t *file_date)
 {
 	struct stat buffer;
 	struct timezone tz;
+	struct timeval t;
 
-	gettimeofday(NULL, &tz);
+	gettimeofday(&t, &tz);
 	int exist = stat(path.c_str(), &buffer);
 	if (file_date)
 		*file_date = buffer.st_mtime + tz.tz_minuteswest * 60;
