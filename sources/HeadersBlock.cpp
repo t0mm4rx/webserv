@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/23 18:51:44 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/26 13:03:20 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,6 +255,7 @@ HeadersBlock::HeadersBlock(const std::string & block)
                 this->getStatusLine(lines);
         }
     this->getHeaderFileds(lines);
+
     }
     catch (const std::exception& e)
     {
