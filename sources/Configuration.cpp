@@ -202,7 +202,6 @@ void Configuration::print(void)
 	for (size_t i = 0; i < _servers.size(); i++)
 	{
 		std::cout << "- Server" << std::endl;
-		std::cout << _servers[i].names.size() << std::endl;
 		std::cout << "   * server_name: ";
 		for (size_t j = 0; j < _servers[i].names.size(); ++j)
 			std::cout << _servers[i].names[j] << " ";
