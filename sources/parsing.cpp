@@ -352,7 +352,7 @@ std::string replace(std::string source, std::string to_replace, std::string new_
 }
 
 /**
- * Check if a path is non-existent, a file, or a directory
+ * Check if a path is non-existent, a file, or a directory, and get its last-modified date
  * @param path the path to check
  * @param file_date a time_t value that will be set to the date of modification of the file
  * @return 0 if the path is non-existant, 1 if the path is a file, 2 if the path is a directory
@@ -360,9 +360,12 @@ std::string replace(std::string source, std::string to_replace, std::string new_
 int pathType(std::string path, time_t *file_date)
 {
 	struct stat buffer;
+	struct timezone tz;
+
+	gettimeofday(NULL, &tz);
 	int exist = stat(path.c_str(), &buffer);
 	if (file_date)
-		*file_date = buffer.st_mtime;
+		*file_date = buffer.st_mtime + tz.tz_minuteswest * 60;
 	if (exist == 0)
 	{
 		if (S_ISREG(buffer.st_mode))

@@ -92,6 +92,7 @@ std::string RequestInterpretor::_get(std::string ressource_path)
 			content_bytes = readBinaryFile(ressource_path);
 			ressource_content = reinterpret_cast<unsigned char *>(&content_bytes[0]);
 			headers["Content-Type"] = _getMIMEType(ressource_path);
+			pathType(ressource_path, &file_date);
 			headers["Last-Modified"] = _formatTimestamp(file_date);
 			return (_generateResponse(200, headers, ressource_content, content_bytes.size()));
 		}
@@ -367,9 +368,10 @@ Configuration::location RequestInterpretor::_getLocation(std::string ressource)
 std::string RequestInterpretor::_getDateHeader(void)
 {
 	struct timeval now;
+	struct timezone tz;
 
-	gettimeofday(&now, NULL);
-	return (_formatTimestamp(now.tv_sec));
+	gettimeofday(&now, &tz);
+	return (_formatTimestamp(now.tv_sec + tz.tz_minuteswest * 60));
 }
 
 /**

@@ -10,6 +10,7 @@
 # include <vector>
 # include <sstream>
 # include <sys/stat.h>
+# include <sys/time.h>
 # include <sys/types.h>
 
 static const char* server_properties[] = {
