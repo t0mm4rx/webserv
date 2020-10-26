@@ -6,7 +6,7 @@ NAME = WebServ
 SOURCES_FOLDER = sources/
 SOURCES =	WebServ.cpp \
 			Socket.cpp \
-			SocketManager.cpp \
+			SubSocket.cpp \
 			Server.cpp \
 			Configuration.cpp \
 			HeadersBlock.cpp \
@@ -18,6 +18,7 @@ SOURCES =	WebServ.cpp \
 INCLUDES_FOLDER = includes/
 INCLUDES = 	WebServ.hpp \
 			Socket.hpp \
+			SubSocket.hpp \
 			Server.hpp \
 			Configuration.hpp \
 			HeadersBlock.hpp \
