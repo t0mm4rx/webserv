@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:29:54 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/23 02:18:49 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/23 16:38:19 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,13 @@ class HeadersBlock
         ~HeadersBlock();
         HeadersBlock &operator=(const HeadersBlock& op);
 
-        bool isRequest(void);
+        bool isRequest(void) const;
+
+        struct request_line getRequestLine(void) const;
+        struct status_line getStatusLine(void) const;
+        std::vector<struct header_field> getHeaderFields(void) const;
 };
+
+std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb);
 
 #endif

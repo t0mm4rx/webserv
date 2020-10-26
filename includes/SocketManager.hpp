@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 22:45:21 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/21 16:08:13 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/24 22:54:57 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,24 +16,94 @@
 #include <vector>
 #include   <sys/time.h>
 #include "Socket.hpp"
+#include "SubSocket.hpp"
 
+template <class T = Socket>
 class SocketManager
 {
     private:
-        std::vector<Socket *>   _sockets;
+        std::vector<T *>   _sockets;
 
     public:
-        SocketManager();
-        SocketManager(const SocketManager& copy);
-        ~SocketManager();
-        SocketManager &operator=(const SocketManager& op);
+        //WIP
+        SocketManager()
+        :
+            _sockets()
+        {}
+        
+        //WIP
+        SocketManager(const SocketManager& copy)
+        :
+            _sockets(copy._sockets)
+        {}
+        
+        //WIP
+        ~SocketManager() {}
+        
+        //WIP
+        SocketManager &operator=(const SocketManager& op)
+        {(void)op; return (*this); }
 
-        void    registerSocket(Socket *socket);
+        /**
+         *  @brief Add a socket to the socket manager.
+         * 
+         *  @param socket the socket.
+         */
+        void registerSocket(T *socket)
+        {
+            this->_sockets.push_back(socket);
+        }
 
-        fd_set  getSDSet(void);
-        int     getLastSD(void);
+        fd_set  getSDSet(void)
+        {
+            fd_set sockets_fds_set;
 
-        bool    hasSD(int socket_descriptor);
+            FD_ZERO(&sockets_fds_set);
+            for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+                FD_SET((*it)->getSocketDescriptor(), &sockets_fds_set);
+            return (sockets_fds_set);
+        }
+
+        int     getLastSD(void)
+        {
+            return ((*(this->_sockets.end() - 1))->getSocketDescriptor());
+        }
+
+        T  &getBySD(int sd)
+        {
+            for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+            {
+                if ((*it)->getSocketDescriptor() == sd)
+                    return (*(*it));
+            }
+            throw(throwMessage("SD not found."));
+        }
+
+        std::vector<T *>  getSockets(void)
+        {
+            return (this->_sockets);
+        }
+
+        /**
+         *  @brief Give a boolean that contain if the socket descriptor
+         *  given in param is a socket descriptor of a socket of the
+         *  socket manager.
+         * 
+         *  @param socket_descriptor the socket descriptor to check.
+         *  @return true if the socket descriptor is one of the socket
+         *      manager, false otherwise.
+         */
+        bool    hasSD(int socket_descriptor)
+        {
+            std::vector<Socket *>::iterator it;
+
+            for (it = this->_sockets.begin(); it != this->_sockets.end(); it ++)
+            {
+                if ((*it)->getSocketDescriptor() == socket_descriptor)
+                    return (true);
+            }
+            return (false);
+        }
 };
 
 #endif

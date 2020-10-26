@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/23 02:30:30 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/24 23:09:42 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,19 +42,24 @@ int main(int argc, char **argv)
     
     DEBUG("")
    
-    std::vector<Socket *> socket_list;
 
     try
     {
         Configuration test = Configuration(path);
 		    test.print();
+        SocketManager<Socket> sm;
         for (int i = 0; i < (int)test.getServers().size(); i++)
-            socket_list.push_back(new Socket(test.getServers()[i]));
-        SocketManager sm;
-
-        for (int i = 0; i < (int)socket_list.size(); i++)
-            sm.registerSocket(*(socket_list.begin() + i));
-
+        {
+            Socket *exist = NULL;
+            for (int j = 0; j < sm.getSockets().size(); j++)
+                if (sm.getSockets()[j]->getServerConfiguration().port == test.getServers()[i].port)
+                    exist = sm.getSockets()[j];
+            if (exist == NULL)
+                sm.registerSocket(new Socket(test.getServers()[i]));
+            else
+                sm.registerSocket(new Socket(exist->getSocketDescriptor(), test.getServers()[i]));
+        }
+        
         Server server(sm);
         
         server.loop();

@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/23 02:29:48 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/23 18:51:44 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,7 +275,48 @@ HeadersBlock::~HeadersBlock()
 HeadersBlock &HeadersBlock::operator=(const HeadersBlock& op)
 {(void)op; return (*this);}
 
-bool HeadersBlock::isRequest(void)
+bool HeadersBlock::isRequest(void) const
 {
     return (this->_is_request);
+}
+
+struct HeadersBlock::request_line HeadersBlock::getRequestLine(void) const
+{
+    return (this->_request_line);   
+}
+
+struct HeadersBlock::status_line HeadersBlock::getStatusLine(void) const
+{
+    return (this->_status_line);
+}
+
+std::vector<struct HeadersBlock::header_field> HeadersBlock::getHeaderFields(void) const
+{
+    return (this->_header_fields);
+}
+
+std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb)
+{
+    if (hb.isRequest())
+    {
+        out << "START LINE = ";
+        out << hb.getRequestLine()._method << " | ";
+        out << hb.getRequestLine()._request_target;
+        out << " | " << hb.getRequestLine()._http_version << std::endl;
+    }
+    else
+    {
+        out << "START LINE = ";
+        out << hb.getStatusLine()._http_version << " | ";
+        out << hb.getStatusLine()._status_code;
+        out << " | " << hb.getStatusLine()._reason_phrase << std::endl;
+    }
+
+    for (size_t i = 0; i < hb.getHeaderFields().size(); i++)
+    {
+        out << "HEADER_FIELD = ";
+        out << hb.getHeaderFields()[i]._field_name << " | ";
+        out<< hb.getHeaderFields()[i]._field_value << std::endl;
+    }
+    return (out);
 }
