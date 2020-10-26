@@ -174,7 +174,7 @@ void Server::loop()
                                 SubSocket plop = sub_sm.getBySD(i);
                                 std::cout << "SOCKET = " << plop.getSocketDescriptor() << " | PARENT = " << plop.getParent().getSocketDescriptor() << std::endl;
                                 // std::cout << "Server Name = " <<  plop.getParent().getServerConfiguration().name << std::endl;
-                                treat(i, buffer);  //Temporary
+                                treat(i, buffer, plop.getParent().getServerConfiguration());  //Temporary
                             }
                             catch (const std::exception& e)
                             {
