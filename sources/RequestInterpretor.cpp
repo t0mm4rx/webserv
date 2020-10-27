@@ -4,7 +4,6 @@
  * Creates a request interpretor from the request string and a server configuration
  * @param request the string repreesentation of the HTTP request
  * @param serverConf the server configuration
- * @todo Add the HTTP request parsing here
  */
 RequestInterpretor::RequestInterpretor(std::string request, Configuration::server serverConf)
 : _request(request), _header_block(HeadersBlock(const_cast<const std::string &>(request))), _conf(serverConf)
@@ -51,6 +50,7 @@ std::string RequestInterpretor::getResponse(void)
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
 	ressource_path += _ressource;
+	std::cout << CGI("/Users/tom/Documents/www/cgi_tester", ressource_path, _header_block, _conf).getOutput() << std::endl;
 	DEBUG("ressource path: " + ressource_path);
 	if (method == "GET")
 		return _get(ressource_path);

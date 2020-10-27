@@ -12,6 +12,7 @@
 # include "parsing.hpp"
 # include "WebServ.hpp"
 # include "HeadersBlock.hpp"
+# include "CGI.hpp"
 
 class RequestInterpretor
 {

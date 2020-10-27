@@ -12,6 +12,7 @@ SOURCES =	WebServ.cpp \
 			RequestInterpretor.cpp \
 			HeadersBlock.cpp \
 			parsing.cpp \
+			CGI.cpp \
 			Error.cpp
 #===============================================================================
 
