@@ -36,6 +36,7 @@ class RequestInterpretor
 		Configuration::location _getLocation(std::string ressource);
 		bool _isMethodAllowed(std::string method);
 		std::string _formatRessource(std::string ressource);
+		bool _shouldCallCGI(std::string ressource_path);
 	public:
 		RequestInterpretor(std::string req = "", Configuration::server serverConf = Configuration::server());
 		RequestInterpretor(const RequestInterpretor &other);

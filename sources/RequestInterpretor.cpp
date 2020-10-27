@@ -50,8 +50,12 @@ std::string RequestInterpretor::getResponse(void)
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
 	ressource_path += _ressource;
-	std::cout << CGI("/Users/tom/Documents/www/cgi_tester", ressource_path, _header_block, _conf).getOutput() << std::endl;
 	DEBUG("ressource path: " + ressource_path);
+	if (_shouldCallCGI(ressource_path))
+	{
+		DEBUG("call CGI for this request");
+		return (CGI(_location.cgi_path, ressource_path, _header_block, _conf).getOutput());
+	}
 	if (method == "GET")
 		return _get(ressource_path);
 	if (method == "HEAD")
@@ -462,4 +466,29 @@ std::string RequestInterpretor::_formatRessource(std::string ressource)
 		++i;
 	res = std::string(res, 0, i);
 	return (res);
+}
+
+/**
+ * Detect if we should use a CGI for this file
+ * @return wether we should use the CGI for the current request
+ */
+bool RequestInterpretor::_shouldCallCGI(std::string ressource_path)
+{
+	size_t i;
+	std::string ext;
+
+	if (_location.cgi_path.size() == 0)
+		return (false);
+	i = 0;
+	while (ressource_path[i] && ressource_path[i] != '.')
+		++i;
+	if (i >= ressource_path.size())
+		return (false);
+	ext = std::string(ressource_path, i + 1, ressource_path.size() - i);
+	for (size_t j = 0; j < _location.cgi_extension.size(); ++j)
+	{
+		if (_location.cgi_extension[j] == ext)
+			return (true);
+	}
+	return (false);
 }

@@ -265,7 +265,12 @@ HeadersBlock::HeadersBlock(const std::string & block)
 
 //WIP
 HeadersBlock::HeadersBlock(const HeadersBlock& copy)
-{(void)copy;}
+{
+	this->_request_line = copy._request_line;
+	this->_status_line = copy._status_line;
+	this->_header_fields = copy._header_fields;
+	this->_is_request = copy._is_request;
+}
 
 //WIP
 HeadersBlock::~HeadersBlock()
