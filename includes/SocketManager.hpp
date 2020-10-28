@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 22:45:21 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/26 16:49:22 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/28 16:40:52 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,20 +82,10 @@ class SocketManager
         T   &getBySDandHost(int sd, std::string host)
         {
             for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
-            {
                 if ((*it)->getSocketDescriptor() == sd)
-                {
-                    std::cout << "SD IN = " << sd << std::endl;
-                    std::cout << "SIZE = " << (*it)->getServerConfiguration().names.size() << std::endl;
-                    for (std::vector<std::string>::iterator names = (*it)->getServerConfiguration().names.begin();
-                        names != (*it)->getServerConfiguration().names.end(); names++)
-                        {
-                            std::cout << "NAME IN = " << (*names).c_str() << " | HOST = " << host << std::endl;
-                            if ((*names) == host)
-                                return (*(*it));
-                        }
-                }
-            }
+                    for (size_t j = 0; j < (*it)->getServerConfiguration().names.size(); j++)
+                        if ((*it)->getServerConfiguration().names[j] == host)
+                            return (*(*it));
             throw(throwMessage("SD & Host not found."));
         }
 

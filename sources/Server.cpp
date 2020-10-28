@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/28 16:06:02 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/28 16:52:44 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,34 @@ int Server::closeConnection(int sd, int max_sd, fd_set *master_set)
     return (max_sd);
 }
 
+/**
+ *  @brief Give the server name where the client want
+ *  to access.
+ * 
+ *  @param hb the headers block containing the host parameter.
+ *  @return the server name.
+ */
+std::string Server::getServerName(const HeadersBlock& hb)
+{
+    std::string server_name;
+
+    for (size_t i = 0; i < hb.getHeaderFields().size(); i++)
+    {
+        DEBUG("Header name = " << hb.getHeaderFields()[i]._field_name)
+        if (hb.getHeaderFields()[i]._field_name == "Host")
+        {
+            size_t pos = hb.getHeaderFields()[i]._field_value.find(':');
+            if (pos != std::string::npos)
+                server_name = hb.getHeaderFields()[i]._field_value.substr(0, pos);
+            else
+                server_name = hb.getHeaderFields()[i]._field_value.substr(0, hb.getHeaderFields()[i]._field_value.length());
+            DEBUG("Server Name = " << server_name)
+            break;
+        }
+    }
+    return (server_name);
+}
+
 //WIP
 void Server::loop()
 {
@@ -158,12 +186,7 @@ void Server::loop()
                 {
                     socket_ready--;
                     if (this->_sm.hasSD(i))
-                    {
                         max_sd = this->acceptConnection(i, max_sd, &master_set, sub_sm);
-                        // std::cout << "SUB LIST : " << std::endl;
-                        // for (size_t i = 0; i < sub_sm.getSockets().size(); i++)
-                        //     std::cout << "SUB = " << sub_sm.getSockets()[i]->getSocketDescriptor() << std::endl;
-                    }
                     else
                     {
                         char buffer[40000];
@@ -175,29 +198,9 @@ void Server::loop()
                             try
                             {
                                 HeadersBlock test(buffer);
-                                // std::cout << test;
-                                std::string server_name;
-
-                                for (size_t i = 0; i < test.getHeaderFields().size(); i++)
-                                {
-                                    std::cout << "Header name = " << test.getHeaderFields()[i]._field_name << std::endl;
-                                    if (test.getHeaderFields()[i]._field_name == "Host")
-                                    {
-                                        size_t pos = test.getHeaderFields()[i]._field_value.find(':');
-                                        if (pos != std::string::npos)
-                                            server_name = test.getHeaderFields()[i]._field_value.substr(0, pos);
-                                        else
-                                            server_name = test.getHeaderFields()[i]._field_value.substr(0, test.getHeaderFields()[i]._field_value.length());
-                                        std::cout << "Server Name = " << server_name << std::endl;
-                                        break;
-                                    }
-                                }
-                                SubSocket plop = sub_sm.getBySD(i);
-
-                                // Socket last = this->_sm.getBySDandHost(plop.getParent().getSocketDescriptor(), server_name);
-                                // std::cout << "SOCKET = " << plop.getSocketDescriptor() << " | PARENT = " << plop.getParent().getSocketDescriptor() << std::endl;
-                                // std::cout << "Server Name = " <<  plop.getParent().getServerConfiguration().name << std::endl;
-                                treat(i, buffer, plop.getParent().getServerConfiguration());  //Temporary
+                                std::string server_name = this->getServerName(test);
+                                Socket last = this->_sm.getBySDandHost(sub_sm.getBySD(i).getParent().getSocketDescriptor(), server_name);
+                                treat(i, buffer, last.getServerConfiguration());  //Temporary
                             }
                             catch (const std::exception& e)
                             {
