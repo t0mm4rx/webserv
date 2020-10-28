@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/26 12:14:14 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/28 16:06:02 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,12 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
 
     DEBUG("Readable socket")
 
+
     do
     {
-        if ((new_sd = accept(sd, NULL, NULL)) < 0)
+        sockaddr_in client;
+        socklen_t size = sizeof(client);
+        if ((new_sd = accept(sd, (sockaddr *)&client, &size)) < 0)
         {
             if (errno != EWOULDBLOCK)
                 throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : accept() failed"));
@@ -78,6 +81,8 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
         DEBUG("New connection added")
         // std::cout << "NAME = [" << this->_sm.getBySD(sd).getServerConfiguration().name << "]" << std::endl;
         std::cout << "SD = " << sd << std::endl;
+        std::string connected_ip = inet_ntoa(client.sin_addr);
+        std::cout << "IP CLIENT = " << connected_ip << std::endl;
         sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), new_sd));
         FD_SET(new_sd, master_set);
         if (new_sd > max_sd)
@@ -171,8 +176,26 @@ void Server::loop()
                             {
                                 HeadersBlock test(buffer);
                                 // std::cout << test;
+                                std::string server_name;
+
+                                for (size_t i = 0; i < test.getHeaderFields().size(); i++)
+                                {
+                                    std::cout << "Header name = " << test.getHeaderFields()[i]._field_name << std::endl;
+                                    if (test.getHeaderFields()[i]._field_name == "Host")
+                                    {
+                                        size_t pos = test.getHeaderFields()[i]._field_value.find(':');
+                                        if (pos != std::string::npos)
+                                            server_name = test.getHeaderFields()[i]._field_value.substr(0, pos);
+                                        else
+                                            server_name = test.getHeaderFields()[i]._field_value.substr(0, test.getHeaderFields()[i]._field_value.length());
+                                        std::cout << "Server Name = " << server_name << std::endl;
+                                        break;
+                                    }
+                                }
                                 SubSocket plop = sub_sm.getBySD(i);
-                                std::cout << "SOCKET = " << plop.getSocketDescriptor() << " | PARENT = " << plop.getParent().getSocketDescriptor() << std::endl;
+
+                                // Socket last = this->_sm.getBySDandHost(plop.getParent().getSocketDescriptor(), server_name);
+                                // std::cout << "SOCKET = " << plop.getSocketDescriptor() << " | PARENT = " << plop.getParent().getSocketDescriptor() << std::endl;
                                 // std::cout << "Server Name = " <<  plop.getParent().getServerConfiguration().name << std::endl;
                                 treat(i, buffer, plop.getParent().getServerConfiguration());  //Temporary
                             }

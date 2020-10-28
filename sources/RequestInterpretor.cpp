@@ -9,12 +9,10 @@
 RequestInterpretor::RequestInterpretor(std::string request, Configuration::server serverConf)
 : _request(request), _header_block(HeadersBlock(const_cast<const std::string &>(request))), _conf(serverConf)
 {
-	// this->_header_block = ;
 	if (this->_header_block.isRequest())
 		this->_ressource = this->_header_block.getRequestLine()._request_target;
-	// this->_ressource = splitWhitespace(getLine(request, 0))[1];
 	this->_location = _getLocation(_ressource);
-	this->_ressource.replace(0, this->_location.name.size(), "/");
+	this->_ressource = _formatRessource(this->_ressource);
 	DEBUG("location: " + this->_location.name);
 }
 
@@ -444,4 +442,24 @@ bool RequestInterpretor::_isMethodAllowed(std::string method)
 			return (true);
 	}
 	return (false);
+}
+
+/**
+ * Remove location name and arguments from ressource
+ * @param ressource
+ * @return ressource without location name and args
+ * @example "/wordpress/index.php?page_id=12" with location "/wordpress" will give "/index.php"
+ */
+std::string RequestInterpretor::_formatRessource(std::string ressource)
+{
+	std::string res;
+	size_t i;
+
+	i = 0;
+	res = ressource;
+	res.replace(0, this->_location.name.size(), "/");
+	while (res[i] && res[i] != '?')
+		++i;
+	res = std::string(res, 0, i);
+	return (res);
 }

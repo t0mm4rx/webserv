@@ -100,7 +100,7 @@ void Configuration::_parseServerProperty(std::string source, size_t n, server &s
 	}
 	if (line[0] == server_properties[1])
 	{
-		for (size_t i = 0; i < line.size(); ++i)
+		for (size_t i = 1; i < line.size(); ++i)
 			s.names.push_back(line[i]);
 	}
 	if (line[0] == server_properties[2])
