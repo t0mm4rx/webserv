@@ -41,25 +41,41 @@ RequestInterpretor &RequestInterpretor::operator=(const RequestInterpretor &othe
  */
 std::string RequestInterpretor::getResponse(void)
 {
+	std::map<std::string, std::string> headers;
 	std::string method = _header_block.getRequestLine()._method;
 	std::string ressource_path;
 
+	headers["Content-Type"] = _getMIMEType(".html");
 	if (!_isMethodAllowed(method))
 		return (_wrongMethod());
 	ressource_path = _location.root;
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
 	ressource_path += _ressource;
+	if (pathType(ressource_path, NULL) == 2)
+	{
+		if (pathType(ressource_path + _location.index, NULL) == 1)
+			ressource_path = ressource_path + _location.index;
+		else
+		{
+			if (_location.autoindex)
+				return (_generateResponse(200, headers, method != "HEAD" ? _getListingHTMLPage(ressource_path, _ressource) : ""));
+			else
+				return (_generateResponse(403, headers, method != "HEAD" ? _getErrorHTMLPage(403) : ""));
+		}
+	}
+	if (pathType(ressource_path, NULL) == 0)
+		return (_generateResponse(404, headers, method != "HEAD" ? _getErrorHTMLPage(404) : ""));
 	DEBUG("ressource path: " + ressource_path);
 	if (_shouldCallCGI(ressource_path))
 	{
 		DEBUG("call CGI for this request");
-		return (_addCGIHeaders(CGI(_location.cgi_path, ressource_path, _header_block, _conf).getOutput()));
+		return (_addCGIHeaders(CGI(_location.cgi_path, ressource_path, _header_block, _conf, _location).getOutput()));
 	}
 	if (method == "GET")
-		return _get(ressource_path);
+		return _get(ressource_path, headers);
 	if (method == "HEAD")
-		return _head(ressource_path);
+		return _head(ressource_path, headers);
 	return ("");
 }
 
@@ -68,51 +84,26 @@ std::string RequestInterpretor::getResponse(void)
  * @param ressource_path the path of the ressource to GET on the disk
  * @return the string representation of the HTTP response
  */
-std::string RequestInterpretor::_get(std::string ressource_path, bool send_body)
+std::string RequestInterpretor::_get(std::string ressource_path, std::map<std::string, std::string> headers, bool send_body)
 {
-	std::map<std::string, std::string> headers;
 	std::vector<unsigned char> content_bytes;
 	unsigned char *ressource_content;
-	int ressource_type;
 	time_t file_date;
 
-	headers["Content-Type"] = _getMIMEType(".html");
-	headers["Date"] = _getDateHeader();
-	ressource_type = pathType(ressource_path, &file_date);
-	if (ressource_type == 0)
-		return (_generateResponse(404, headers, send_body ? _getErrorHTMLPage(404) : ""));
-	if (ressource_type == 2)
+	try
 	{
-		if (pathType(ressource_path + _location.index, NULL) == 1)
-		{
-			ressource_path = ressource_path + _location.index;
-			ressource_type = 1;
-		}
-		else
-		{
-			if (_location.autoindex)
-				return (_generateResponse(200, headers, send_body ? _getListingHTMLPage(ressource_path, _ressource) : ""));
-			else
-				return (_generateResponse(403, headers, send_body ? _getErrorHTMLPage(403) : ""));
-		}
+		content_bytes = readBinaryFile(ressource_path);
+		ressource_content = reinterpret_cast<unsigned char *>(&content_bytes[0]);
+		headers["Content-Type"] = _getMIMEType(ressource_path);
+		pathType(ressource_path, &file_date);
+		headers["Last-Modified"] = _formatTimestamp(file_date);
+		if (send_body)
+			return (_generateResponse(200, headers, ressource_content, content_bytes.size()));
+		return (_generateResponse(200, headers, ""));
 	}
-	if (ressource_type == 1)
+	catch (const std::exception &e)
 	{
-		try
-		{
-			content_bytes = readBinaryFile(ressource_path);
-			ressource_content = reinterpret_cast<unsigned char *>(&content_bytes[0]);
-			headers["Content-Type"] = _getMIMEType(ressource_path);
-			pathType(ressource_path, &file_date);
-			headers["Last-Modified"] = _formatTimestamp(file_date);
-			if (send_body)
-				return (_generateResponse(200, headers, ressource_content, content_bytes.size()));
-			return (_generateResponse(200, headers, ""));
-		}
-		catch (const std::exception &e)
-		{
-			return (_generateResponse(403, headers, send_body ? _getErrorHTMLPage(403) : ""));
-		}
+		return (_generateResponse(403, headers, send_body ? _getErrorHTMLPage(403) : ""));
 	}
 	return (_generateResponse(500, headers, send_body ? _getErrorHTMLPage(500) : ""));
 }
@@ -122,9 +113,9 @@ std::string RequestInterpretor::_get(std::string ressource_path, bool send_body)
  * @param ressource_path the path of the ressource to GET on the disk
  * @return the string representation of the HTTP response
  */
-std::string RequestInterpretor::_head(std::string ressource_path)
+std::string RequestInterpretor::_head(std::string ressource_path, std::map<std::string, std::string> headers)
 {
-	return (_get(ressource_path, false));
+	return (_get(ressource_path, headers, false));
 }
 
 /**
@@ -161,6 +152,7 @@ std::string RequestInterpretor::_generateResponse(size_t code, std::map<std::str
 
 	headers["Content-Length"] = uIntegerToString(content_size);
 	headers["Server"] = "webserv";
+	headers["Date"] = _getDateHeader();
 	response += "HTTP/1.1 ";
 	response += uIntegerToString(code) + " ";
 	response += _getStatusDescription(code) + "\n";
@@ -495,7 +487,7 @@ bool RequestInterpretor::_shouldCallCGI(std::string ressource_path)
 }
 
 /**
- * Add mendatory server headers to a CGI HTTP response
+ * Add mendatory server headers to a CGI HTTP response, if status is returned we get it to form HTTP status
  * @param response the HTTP response out of the CGI
  * @return the same HTTP response with additional headers
  */
@@ -508,6 +500,27 @@ std::string RequestInterpretor::_addCGIHeaders(std::string response)
 	res = response;
 	res = "Content-Length: " + uIntegerToString(size) + "\n" + res;
 	res = "Date: " + _getDateHeader() + "\n" + res;
-	res = "HTTP/1.1 200 OK\n" + res;
+	if (_getCGIStatus(response).size() > 0)
+		res = "HTTP/1.1 " + _getCGIStatus(response) + "\n" + res;
+	else
+		res = "HTTP/1.1 200 OK\n" + res;
 	return (res);
+}
+
+/**
+ * Get CGI response status if any
+ * @param response the CGI response
+ * @return a string containing the code and status if found, an empty string if not
+ */
+std::string RequestInterpretor::_getCGIStatus(std::string response)
+{
+	std::vector<std::string> splits;
+
+	for (size_t i = 0; i < countLines(response); ++i)
+	{
+		splits = splitWhitespace(getLine(response, i));
+		if (splits.size() == 3 && splits[0] == "Status:")
+			return (splits[1] + " " + splits[2]);
+	}
+	return ("");
 }

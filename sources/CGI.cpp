@@ -3,11 +3,13 @@
 /**
  * Creates a new CGI object
  * @param cgi_path the path to the CGI binary to execute
- * @param file the file to execute with the CGI
+ * @param ressource the file to execute with the CGI
  * @param request the HTTP request to handle
+ * @param conf the server configuration
+ * @param location the current location conf
  */
-CGI::CGI(std::string cgi_path, std::string ressource_path, HeadersBlock request, Configuration::server conf)
-: _cgi_path(cgi_path), _ressource_path(ressource_path), _request(request), _conf(conf)
+CGI::CGI(std::string cgi_path, std::string ressource_path, HeadersBlock request, Configuration::server conf, Configuration::location location)
+: _cgi_path(cgi_path), _ressource_path(ressource_path), _request(request), _conf(conf), _location(location)
 {}
 
 CGI::~CGI(void)
@@ -143,6 +145,7 @@ std::map<std::string, std::string> CGI::_getParams(void)
 {
 	std::map<std::string, std::string> args;
 
+	args["DOCUMENT_ROOT"] = _location.root;
 	args["GATEWAY_INTERFACE"] = "CGI/1.1";
 	args["PATH_INFO"] = _cgi_path;
 	args["PATH_TRANSLATED"] = _ressource_path;
@@ -151,7 +154,7 @@ std::map<std::string, std::string> CGI::_getParams(void)
 	args["REQUEST_URI"] = _request.getRequestLine()._request_target;
 	args["SCRIPT_NAME"] = _getScriptName();
 	args["SERVER_NAME"] = _conf.host;
-	args["SERVER_PORT"] = _conf.port;
+	args["SERVER_PORT"] = uIntegerToString(_conf.port);
 	args["SERVER_PROTOCOL"] = "HTTP/1.1";
 	args["SERVER_SOFTWARE"] = "webserv/1.0";
 	return (args);
@@ -161,10 +164,10 @@ std::string CGI::_getScriptName(void)
 {
 	size_t i;
 
-	i = _ressource_path.size() - 1;
-	while (_ressource_path[i] != '/')
-		--i;
-	return (std::string(_ressource_path, i, _ressource_path.size() - i));
+	i = 0;
+	while (_request.getRequestLine()._request_target[i] && _request.getRequestLine()._request_target[i] != '?')
+		++i;
+	return (std::string(_request.getRequestLine()._request_target, 0, i));
 }
 
 /**
