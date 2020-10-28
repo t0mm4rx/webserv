@@ -35,7 +35,7 @@ RequestInterpretor &RequestInterpretor::operator=(const RequestInterpretor &othe
 }
 
 /**
- * Get the HTTP request for the given request
+ * Translate path and get the HTTP request for the given request
  * @return a string representing the HTTP response
  * @todo implement the case when the method isn't correct
  */
