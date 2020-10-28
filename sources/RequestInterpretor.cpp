@@ -54,7 +54,7 @@ std::string RequestInterpretor::getResponse(void)
 	if (_shouldCallCGI(ressource_path))
 	{
 		DEBUG("call CGI for this request");
-		return (CGI(_location.cgi_path, ressource_path, _header_block, _conf).getOutput());
+		return (_addCGIHeaders(CGI(_location.cgi_path, ressource_path, _header_block, _conf).getOutput()));
 	}
 	if (method == "GET")
 		return _get(ressource_path);
@@ -462,6 +462,7 @@ std::string RequestInterpretor::_formatRessource(std::string ressource)
 	i = 0;
 	res = ressource;
 	res.replace(0, this->_location.name.size(), "/");
+	res = replace(res, "//", "/");
 	while (res[i] && res[i] != '?')
 		++i;
 	res = std::string(res, 0, i);
@@ -491,4 +492,22 @@ bool RequestInterpretor::_shouldCallCGI(std::string ressource_path)
 			return (true);
 	}
 	return (false);
+}
+
+/**
+ * Add mendatory server headers to a CGI HTTP response
+ * @param response the HTTP response out of the CGI
+ * @return the same HTTP response with additional headers
+ */
+std::string RequestInterpretor::_addCGIHeaders(std::string response)
+{
+	std::string res;
+	size_t size;
+
+	size = response.size() - response.find("\n\r") - 3;
+	res = response;
+	res = "Content-Length: " + uIntegerToString(size) + "\n" + res;
+	res = "Date: " + _getDateHeader() + "\n" + res;
+	res = "HTTP/1.1 200 OK\n" + res;
+	return (res);
 }

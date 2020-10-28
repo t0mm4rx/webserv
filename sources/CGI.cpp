@@ -26,7 +26,6 @@ std::string CGI::getOutput(void)
 	args = _getParams();
 	args_converted = _convertParams(args);
 	res = _execCGI(args_converted);
-	DEBUG("cgi output:\n" + res);
 	return (res);
 }
 
@@ -46,14 +45,12 @@ std::string CGI::_execCGI(char **args)
 	pid = fork();
 	if (pid == 0)
 	{
-		tmp_fd = open("/tmp/webserv_cgi", O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+		tmp_fd = open("/tmp/webserv_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (tmp_fd < 0)
 			return ("Error");
-		// dup2(tmp_fd, 1);
-		// dup2(tmp_fd, 2);
-		DEBUG("Here1 ");
+		dup2(tmp_fd, 1);
+		dup2(tmp_fd, 2);
 		exec_res = execve(_cgi_path.c_str(), exec_args, args);
-		DEBUG("Here");
 		close(tmp_fd);
 		exit(0);
 	}
@@ -140,24 +137,34 @@ char *CGI::_newStr(std::string source)
 /**
  * Get the CGI params
  * @return a map of the CGI param to execute
+ * @todo implement AUTH_TYPE, CONTENT_LENGTH, CONTENT_TYPE, REMOTE_ADDR, REMOTE_IDENT, REMOTE_USER
  */
 std::map<std::string, std::string> CGI::_getParams(void)
 {
 	std::map<std::string, std::string> args;
 
-	args["CONTENT_LENGTH"] = "0";
 	args["GATEWAY_INTERFACE"] = "CGI/1.1";
-	args["PATH_INFO"] = _ressource_path;
+	args["PATH_INFO"] = _cgi_path;
 	args["PATH_TRANSLATED"] = _ressource_path;
 	args["QUERY_STRING"] = _getQueryString();
 	args["REQUEST_METHOD"] = _request.getRequestLine()._method;
-	args["REQUEST_URI"] = _ressource_path;
-	args["SCRIPT_NAME"] = _ressource_path;
+	args["REQUEST_URI"] = _request.getRequestLine()._request_target;
+	args["SCRIPT_NAME"] = _getScriptName();
 	args["SERVER_NAME"] = _conf.host;
 	args["SERVER_PORT"] = _conf.port;
 	args["SERVER_PROTOCOL"] = "HTTP/1.1";
 	args["SERVER_SOFTWARE"] = "webserv/1.0";
 	return (args);
+}
+
+std::string CGI::_getScriptName(void)
+{
+	size_t i;
+
+	i = _ressource_path.size() - 1;
+	while (_ressource_path[i] != '/')
+		--i;
+	return (std::string(_ressource_path, i, _ressource_path.size() - i));
 }
 
 /**

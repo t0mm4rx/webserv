@@ -23,6 +23,7 @@ class CGI
 		char *_newStr(std::string source);
 		std::string _execCGI(char **args);
 		char **_getExecArgs(void);
+		std::string _getScriptName(void);
 	public:
 		CGI(void);
 		CGI(std::string cgi_path, std::string ressource_path, HeadersBlock request, Configuration::server conf);
