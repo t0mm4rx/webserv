@@ -25,6 +25,7 @@ INCLUDES = 	WebServ.hpp \
 			Configuration.hpp \
 			HeadersBlock.hpp \
 			parsing.hpp \
+			CGI.hpp \
 			SocketManager.hpp
 
 INCLUDES_PREFIXED = $(addprefix $(INCLUDES_FOLDER), $(INCLUDES))

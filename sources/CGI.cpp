@@ -183,7 +183,6 @@ std::map<std::string, std::string> CGI::_getParams(void)
 		args[std::string(g_envp[i], 0, j)] = std::string(g_envp[i], j + 1, std::string(g_envp[i]).size() - j);
 		++i;
 	}
-	std::cout << i << std::endl;
 	return (args);
 }
 
