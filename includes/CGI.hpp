@@ -25,6 +25,7 @@ class CGI
 		std::string _execCGI(char **args);
 		char **_getExecArgs(void);
 		std::string _getScriptName(void);
+		std::string _removeQueryArgs(std::string query);
 	public:
 		CGI(void);
 		CGI(std::string cgi_path, std::string ressource_path, HeadersBlock request, Configuration::server conf, Configuration::location location);

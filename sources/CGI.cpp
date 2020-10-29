@@ -1,5 +1,7 @@
 #include "../includes/CGI.hpp"
 
+extern char **g_envp;
+
 /**
  * Creates a new CGI object
  * @param cgi_path the path to the CGI binary to execute
@@ -52,6 +54,7 @@ std::string CGI::_execCGI(char **args)
 			return ("Error");
 		dup2(tmp_fd, 1);
 		dup2(tmp_fd, 2);
+		close(0);
 		exec_res = execve(_cgi_path.c_str(), exec_args, args);
 		close(tmp_fd);
 		exit(0);
@@ -144,19 +147,43 @@ char *CGI::_newStr(std::string source)
 std::map<std::string, std::string> CGI::_getParams(void)
 {
 	std::map<std::string, std::string> args;
+	std::string tmp;
+	size_t i;
+	size_t j;
 
-	args["DOCUMENT_ROOT"] = _location.root;
+	args["CONTENT_LENGTH"] = "0";
 	args["GATEWAY_INTERFACE"] = "CGI/1.1";
-	args["PATH_INFO"] = _cgi_path;
+	args["PATH_INFO"] = _removeQueryArgs(_request.getRequestLine()._request_target);
 	args["PATH_TRANSLATED"] = _ressource_path;
 	args["QUERY_STRING"] = _getQueryString();
 	args["REQUEST_METHOD"] = _request.getRequestLine()._method;
-	args["REQUEST_URI"] = _request.getRequestLine()._request_target;
+	args["REQUEST_URI"] = _removeQueryArgs(_request.getRequestLine()._request_target);
+	args["REMOTE_IDENT"] = "";
+	args["REMOTE_ADDR"] = "127.0.0.1";
 	args["SCRIPT_NAME"] = _getScriptName();
+	args["SCRIPT_FILENAME"] = _ressource_path;
 	args["SERVER_NAME"] = _conf.host;
 	args["SERVER_PORT"] = uIntegerToString(_conf.port);
 	args["SERVER_PROTOCOL"] = "HTTP/1.1";
 	args["SERVER_SOFTWARE"] = "webserv/1.0";
+	for (size_t a = 0; a < _request.getHeaderFields().size(); ++a)
+	{
+		tmp = _request.getHeaderFields()[a]._field_name;
+		tmp = replace(tmp, "-", "_");
+		for (size_t b = 0; b < tmp.size(); ++b)
+			tmp[b] = toupper(tmp[b]);
+		args["HTTP_" + tmp] = _request.getHeaderFields()[a]._field_value;
+	}
+	i = 0;
+	while (g_envp[i])
+	{
+		j = 0;
+		while (g_envp[i][j] && g_envp[i][j] != '=')
+			j++;
+		args[std::string(g_envp[i], 0, j)] = std::string(g_envp[i], j + 1, std::string(g_envp[i]).size() - j);
+		++i;
+	}
+	std::cout << i << std::endl;
 	return (args);
 }
 
@@ -185,4 +212,20 @@ std::string CGI::_getQueryString(void)
 	if (_request.getRequestLine()._request_target[i] == '?')
 		++i;
 	return (std::string(_request.getRequestLine()._request_target, i, -i));
+}
+
+/**
+ * Remove query
+ * @param query the string to remove query from
+ * @return the string without query params
+ * @example "/php/index.php?a=1&page_id=2" -> "/php/index.php"
+ */
+std::string CGI::_removeQueryArgs(std::string query)
+{
+	size_t i;
+
+	i = 0;
+	while (query[i] && query[i] != '?')
+		++i;
+	return (std::string(query, 0, i));
 }
