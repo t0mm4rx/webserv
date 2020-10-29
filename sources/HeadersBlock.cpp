@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/23 18:51:44 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/29 14:18:25 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,9 +188,11 @@ void    HeadersBlock::getStatusLine(std::vector<std::string> lines)
  * 
  *  @param lines the lines of the header.
  */
-void    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
+int    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
 {
-    for (size_t i = 1; i < lines.size(); i++)
+    size_t i = 1;
+
+    for (i = 1; i < lines.size(); i++)
     {
         struct header_field field;
 
@@ -198,7 +200,7 @@ void    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
 
         // Empty
         if (lines[i] == "\r" || lines[i].length() == 0)
-            continue;
+            return (i);
         
         // Field name
         if ((posin = lines[i].find(':')) == std::string::npos) 
@@ -222,11 +224,14 @@ void    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
             
         this->_header_fields.push_back(field);
     }
+    return (i);
 }
 
-HeadersBlock::HeadersBlock(const std::string & block)
+HeadersBlock::HeadersBlock(const std::string & block, const std::string & client_ip)
 :
-    _is_request(false)
+    _is_request(false),
+    _client_ip(client_ip),
+    _content()
 {
     std::vector<std::string> lines;
 
@@ -263,21 +268,40 @@ HeadersBlock::HeadersBlock(const std::string & block)
     }
 }
 
-//WIP
 HeadersBlock::HeadersBlock(const HeadersBlock& copy)
-{(void)copy;}
+:
+    _request_line(copy._request_line),
+    _status_line(copy._status_line),
+    _header_fields(copy._header_fields),
+    _is_request(copy._is_request),
+    _client_ip(copy._client_ip),
+    _content(copy._content)
+{}
 
-//WIP
 HeadersBlock::~HeadersBlock()
 {}
 
-//WIP
 HeadersBlock &HeadersBlock::operator=(const HeadersBlock& op)
-{(void)op; return (*this);}
+{
+    if (&op == this)
+        return (*this);
+    _request_line = op._request_line;
+    _status_line = op._status_line;
+    _header_fields = op._header_fields;
+    _is_request = op._is_request;
+    _client_ip = op._client_ip;
+    _content = op._content;
+    return (*this);
+}
 
 bool HeadersBlock::isRequest(void) const
 {
     return (this->_is_request);
+}
+
+void HeadersBlock::pushContent(std::string buffer)
+{
+    this->_content += buffer;
 }
 
 struct HeadersBlock::request_line HeadersBlock::getRequestLine(void) const
@@ -293,6 +317,11 @@ struct HeadersBlock::status_line HeadersBlock::getStatusLine(void) const
 std::vector<struct HeadersBlock::header_field> HeadersBlock::getHeaderFields(void) const
 {
     return (this->_header_fields);
+}
+
+std::string HeadersBlock::getContent(void) const
+{
+    return (this->_content);
 }
 
 std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb)
