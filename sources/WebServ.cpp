@@ -18,8 +18,11 @@
 #include "../includes/RequestInterpretor.hpp"
 #include "../includes/HeadersBlock.hpp"
 
-int main(int argc, char **argv)
+char **g_envp;
+
+int main(int argc, char **argv, char **env)
 {
+	g_envp = env;
     // char block[] = "GET / HTTP/12.1\r\nHost: 0.0.0.0:3650\r\nUser-Agent: insomnia/2020.4.1\r\nAccept: */*\r\n\r\n";
     // char block[] = "HTTP/1.1 200 plop\nHost: localhost:5000\nUser-Agent: insomnia/2020.4.1\nAccept: */*\n\n";
     // try

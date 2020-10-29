@@ -12,6 +12,7 @@
 # include "parsing.hpp"
 # include "WebServ.hpp"
 # include "HeadersBlock.hpp"
+# include "CGI.hpp"
 
 class RequestInterpretor
 {
@@ -20,8 +21,8 @@ class RequestInterpretor
 		HeadersBlock _header_block;
 		Configuration::server _conf;
 		Configuration::location _location;
-		std::string _get(std::string ressource_path, bool send_body=true);
-		std::string _head(std::string ressource_path);
+		std::string _get(std::string ressource_path, std::map<std::string, std::string> headers, bool send_body=true);
+		std::string _head(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _wrongMethod(void);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, std::string content);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, const unsigned char *content, size_t content_size);
@@ -34,6 +35,9 @@ class RequestInterpretor
 		Configuration::location _getLocation(std::string ressource);
 		bool _isMethodAllowed(std::string method);
 		std::string _formatRessource(std::string ressource);
+		bool _shouldCallCGI(std::string ressource_path);
+		std::string _addCGIHeaders(std::string response);
+		std::string _getCGIStatus(std::string response);
 	public:
 		RequestInterpretor(HeadersBlock &header_block, Configuration::server serverConf = Configuration::server());
 		RequestInterpretor(const RequestInterpretor &other);
