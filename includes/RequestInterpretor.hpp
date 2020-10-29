@@ -16,7 +16,6 @@
 class RequestInterpretor
 {
 	private:
-		std::string _request;
 		std::string _ressource;
 		HeadersBlock _header_block;
 		Configuration::server _conf;
@@ -36,7 +35,7 @@ class RequestInterpretor
 		bool _isMethodAllowed(std::string method);
 		std::string _formatRessource(std::string ressource);
 	public:
-		RequestInterpretor(std::string req = "", Configuration::server serverConf = Configuration::server());
+		RequestInterpretor(HeadersBlock &header_block, Configuration::server serverConf = Configuration::server());
 		RequestInterpretor(const RequestInterpretor &other);
 		RequestInterpretor &operator=(const RequestInterpretor &other);
 		~RequestInterpretor(void);
