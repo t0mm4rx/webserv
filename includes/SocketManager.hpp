@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 22:45:21 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/24 22:54:57 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/28 17:13:30 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ class SocketManager
             return ((*(this->_sockets.end() - 1))->getSocketDescriptor());
         }
 
-        T  &getBySD(int sd)
+        T   &getBySD(int sd)
         {
             for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
             {
@@ -77,6 +77,21 @@ class SocketManager
                     return (*(*it));
             }
             throw(throwMessage("SD not found."));
+        }
+
+        T   &getBySDandHost(int sd, std::string host)
+        {
+            for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+                if ((*it)->getSocketDescriptor() == sd)
+                    for (size_t j = 0; j < (*it)->getServerConfiguration().names.size(); j++)
+                        if ((*it)->getServerConfiguration().names[j] == host)
+                            return (*(*it));
+            for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+                if ((*it)->getSocketDescriptor() == sd)
+                    for (size_t j = 0; j < (*it)->getServerConfiguration().names.size(); j++)
+                        if ((*it)->getServerConfiguration().names[j] == "default_server")
+                            return (*(*it));
+            throw(throwMessage("SD & Host not found."));
         }
 
         std::vector<T *>  getSockets(void)

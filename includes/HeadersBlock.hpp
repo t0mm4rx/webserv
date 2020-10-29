@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:29:54 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/23 16:38:19 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/28 19:09:27 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,23 +45,27 @@ class HeadersBlock
         struct status_line                  _status_line;
         std::vector<struct header_field>    _header_fields;
         bool                                _is_request;
+        std::string                         _client_ip;
+        std::string                         _content;
 
         void    getLines(std::string msg, std::vector<std::string> *lines);
         void    getRequestLine(std::vector<std::string> lines);
         void    getStatusLine(std::vector<std::string> lines);
-        void    getHeaderFileds(std::vector<std::string> lines);
+        int     getHeaderFileds(std::vector<std::string> lines);
 
     public:
-        HeadersBlock(const std::string & block);
+        HeadersBlock(const std::string & block, const std::string & client_ip);
         HeadersBlock(const HeadersBlock& copy);
         ~HeadersBlock();
         HeadersBlock &operator=(const HeadersBlock& op);
 
         bool isRequest(void) const;
+        void pushContent(std::string buffer);
 
         struct request_line getRequestLine(void) const;
         struct status_line getStatusLine(void) const;
         std::vector<struct header_field> getHeaderFields(void) const;
+        std::string getContent(void) const;
 };
 
 std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb);

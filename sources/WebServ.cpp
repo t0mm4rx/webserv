@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/26 12:20:53 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/28 17:05:04 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,9 @@ int main(int argc, char **argv, char **env)
     return (0);
 }
 
-int treat(int sd, char *buffer, Configuration::server server_conf)
+int treat(int sd, HeadersBlock &header_block, Configuration::server server_conf)
 {
-	std::string response = RequestInterpretor(std::string(buffer), server_conf).getResponse();
+	std::string response = RequestInterpretor(header_block, server_conf).getResponse();
     int rc = send(sd, response.c_str(), response.size(), 0);
     if (rc < 0)
     {

@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/26 12:14:14 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/28 19:19:10 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,21 @@ int Server::waitConnection(fd_set *working_set, int max_sd)
     return (socket_ready);
 }
 
+static std::string ft_inet_ntoa(struct in_addr in)
+{
+    std::stringstream buffer;
+
+    unsigned char *bytes = (unsigned char *) &in;
+    for (int cur_bytes = 0; cur_bytes < 4; cur_bytes++)
+    {
+        buffer << (int)bytes[cur_bytes];
+        if (cur_bytes != 3)
+            buffer << '.';
+    }
+    DEBUG("INET NTOA = " << buffer.str())
+    return (buffer.str());
+}
+
 /**
  *  @brief Accept all connections in the queue of the
  *  socket descriptor, add them to the total of connected
@@ -66,9 +81,12 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
 
     DEBUG("Readable socket")
 
+
     do
     {
-        if ((new_sd = accept(sd, NULL, NULL)) < 0)
+        sockaddr_in client;
+        socklen_t size = sizeof(client);
+        if ((new_sd = accept(sd, (sockaddr *)&client, &size)) < 0)
         {
             if (errno != EWOULDBLOCK)
                 throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : accept() failed"));
@@ -76,9 +94,7 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
         }
         
         DEBUG("New connection added")
-        // std::cout << "NAME = [" << this->_sm.getBySD(sd).getServerConfiguration().name << "]" << std::endl;
-        std::cout << "SD = " << sd << std::endl;
-        sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), new_sd));
+        sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), ft_inet_ntoa(client.sin_addr), new_sd));
         FD_SET(new_sd, master_set);
         if (new_sd > max_sd)
             max_sd = new_sd;
@@ -107,7 +123,7 @@ int Server::receiveConnection(int sd, char *buffer, int buffer_size)
             throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
         return (-1);
     }
-    return (0);
+    return((rc >= buffer_size) ? 1 : 0);
 }
 
 /**
@@ -129,6 +145,35 @@ int Server::closeConnection(int sd, int max_sd, fd_set *master_set)
         while (FD_ISSET(max_sd, master_set) == false)
             max_sd -= 1;
     return (max_sd);
+}
+
+/**
+ *  @brief Give the server name where the client want
+ *  to access.
+ *  @todo add throw if host not found.
+ * 
+ *  @param hb the headers block containing the host parameter.
+ *  @return the server name.
+ */
+std::string Server::getServerName(const HeadersBlock& hb)
+{
+    std::string server_name;
+
+    for (size_t i = 0; i < hb.getHeaderFields().size(); i++)
+    {
+        DEBUG("Header name = " << hb.getHeaderFields()[i]._field_name)
+        if (hb.getHeaderFields()[i]._field_name == "Host")
+        {
+            size_t pos = hb.getHeaderFields()[i]._field_value.find(':');
+            if (pos != std::string::npos)
+                server_name = hb.getHeaderFields()[i]._field_value.substr(0, pos);
+            else
+                server_name = hb.getHeaderFields()[i]._field_value.substr(0, hb.getHeaderFields()[i]._field_value.length());
+            DEBUG("Server Name = " << server_name)
+            break;
+        }
+    }
+    return (server_name);
 }
 
 //WIP
@@ -153,28 +198,60 @@ void Server::loop()
                 {
                     socket_ready--;
                     if (this->_sm.hasSD(i))
-                    {
                         max_sd = this->acceptConnection(i, max_sd, &master_set, sub_sm);
-                        // std::cout << "SUB LIST : " << std::endl;
-                        // for (size_t i = 0; i < sub_sm.getSockets().size(); i++)
-                        //     std::cout << "SUB = " << sub_sm.getSockets()[i]->getSocketDescriptor() << std::endl;
-                    }
                     else
                     {
                         char buffer[40000];
                         bzero(buffer, 40000);
+                        
                         if (this->receiveConnection(i, buffer, 40000) < 0)
                             max_sd = this->closeConnection(i, max_sd, &master_set);
                         else
                         {
                             try
                             {
-                                HeadersBlock test(buffer);
-                                // std::cout << test;
-                                SubSocket plop = sub_sm.getBySD(i);
-                                std::cout << "SOCKET = " << plop.getSocketDescriptor() << " | PARENT = " << plop.getParent().getSocketDescriptor() << std::endl;
-                                // std::cout << "Server Name = " <<  plop.getParent().getServerConfiguration().name << std::endl;
-                                treat(i, buffer, plop.getParent().getServerConfiguration());  //Temporary
+                                SubSocket client_socket = sub_sm.getBySD(i);
+                                HeadersBlock test(buffer, client_socket.getClientIp());
+                                std::string server_name = this->getServerName(test);
+                                Socket last = this->_sm.getBySDandHost(client_socket.getParent().getSocketDescriptor(), server_name);
+                                
+                                int content_length = -1;
+                                for (size_t i = 0; i < test.getHeaderFields().size(); i++)
+                                {
+                                    DEBUG("Header name = " << test.getHeaderFields()[i]._field_name)
+                                    if (test.getHeaderFields()[i]._field_name == "Content-Length")
+                                    {
+                                        size_t pos = test.getHeaderFields()[i]._field_value.find(':');
+                                        if (pos != std::string::npos)
+                                            content_length = atoi(test.getHeaderFields()[i]._field_value.substr(0, pos).c_str());
+                                        else
+                                            content_length = atoi(test.getHeaderFields()[i]._field_value.substr(0, test.getHeaderFields()[i]._field_value.length()).c_str());
+                                        std::cout << "Content-length = " << content_length << std::endl;
+                                        break;
+                                    }
+                                }
+                                if (content_length != -1)
+                                {
+                                    int rtn = 0;
+                                    while (content_length)
+                                    {
+                                        bzero(buffer, 40000);
+                                        if ((rtn = this->receiveConnection(i, buffer, 40000)) < 0)
+                                        {
+                                            max_sd = this->closeConnection(i, max_sd, &master_set);
+                                            throw(throwMessage("Connection closed during content getting."));
+                                        }
+                                        else
+                                        {
+                                            test.pushContent(buffer);
+                                            if (rtn != 1)
+                                                break;
+                                        }
+                                    }
+                                    std::cout << "FINAL CONTENT = " << test.getContent();
+                                }
+                                
+                                treat(i, test, last.getServerConfiguration());  //Temporary
                             }
                             catch (const std::exception& e)
                             {

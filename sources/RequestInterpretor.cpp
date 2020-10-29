@@ -5,8 +5,8 @@
  * @param request the string repreesentation of the HTTP request
  * @param serverConf the server configuration
  */
-RequestInterpretor::RequestInterpretor(std::string request, Configuration::server serverConf)
-: _request(request), _header_block(HeadersBlock(const_cast<const std::string &>(request))), _conf(serverConf)
+RequestInterpretor::RequestInterpretor(HeadersBlock & header_block, Configuration::server serverConf)
+: _header_block(header_block), _conf(serverConf)
 {
 	if (this->_header_block.isRequest())
 		this->_ressource = this->_header_block.getRequestLine()._request_target;
@@ -28,7 +28,6 @@ RequestInterpretor &RequestInterpretor::operator=(const RequestInterpretor &othe
 {
 	this->_header_block = other._header_block;
 	this->_ressource = other._ressource;
-	this->_request = other._request;
 	this->_conf = other._conf;
 	this->_location = other._location;
 	return (*this);
