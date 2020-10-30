@@ -362,3 +362,12 @@ std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb)
     }
     return (out);
 }
+
+/**
+ * Get client IP
+ * @return the string representation of the client IP
+ */
+std::string HeadersBlock::getClientIP(void) const
+{
+	return (_client_ip);
+}
