@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/29 14:18:25 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/29 22:25:55 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -240,6 +240,8 @@ HeadersBlock::HeadersBlock(const std::string & block, const std::string & client
     size_t pos = lines[0].find(" ");
     std::string first_word = lines[0].substr(0, lines[0].find(" "));
 
+    for(size_t j = 0; j < lines.size(); j++)
+        std::cout << "LINE = " << lines[j] << std::endl;
     try
     {
         if (pos != std::string::npos)
@@ -248,7 +250,7 @@ HeadersBlock::HeadersBlock(const std::string & block, const std::string & client
             int i;
             while(methods[methods_number++]);
 
-            for (i = 0; i < methods_number && methods[i]; i ++)
+            for (i = 0; i < methods_number && methods[i]; i++)
             {
                 if (first_word == methods[i])
                 {
@@ -259,7 +261,18 @@ HeadersBlock::HeadersBlock(const std::string & block, const std::string & client
             if (methods[i] == NULL)
                 this->getStatusLine(lines);
         }
-    this->getHeaderFileds(lines);
+        size_t end_headers = this->getHeaderFileds(lines);
+        while (42)
+        {
+            if (end_headers < lines.size() && lines[end_headers] == "\r")
+                end_headers++;
+            else
+                break;
+        }
+
+        for (size_t i = end_headers; i < lines.size(); i++)
+            this->pushContent(lines[i]);
+        std::cout << "===========\n[" << this->_content << "]\n=============" << std::endl;
     }
     catch (const std::exception& e)
     {

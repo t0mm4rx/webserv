@@ -5,6 +5,7 @@
 # include <string>
 # include <map>
 # include <stdlib.h>
+# include <sys/wait.h>
 # include "HeadersBlock.hpp"
 # include "Configuration.hpp"
 # include "WebServ.hpp"

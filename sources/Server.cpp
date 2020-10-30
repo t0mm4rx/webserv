@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/28 19:19:10 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/29 18:11:04 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,46 +211,27 @@ void Server::loop()
                             try
                             {
                                 SubSocket client_socket = sub_sm.getBySD(i);
+                                // std::cout << "=================================" << std::endl;
+                                // std::cout << "BUFFER = \n" << buffer << std::endl << std::endl;
                                 HeadersBlock test(buffer, client_socket.getClientIp());
                                 std::string server_name = this->getServerName(test);
                                 Socket last = this->_sm.getBySDandHost(client_socket.getParent().getSocketDescriptor(), server_name);
                                 
-                                int content_length = -1;
-                                for (size_t i = 0; i < test.getHeaderFields().size(); i++)
-                                {
-                                    DEBUG("Header name = " << test.getHeaderFields()[i]._field_name)
-                                    if (test.getHeaderFields()[i]._field_name == "Content-Length")
-                                    {
-                                        size_t pos = test.getHeaderFields()[i]._field_value.find(':');
-                                        if (pos != std::string::npos)
-                                            content_length = atoi(test.getHeaderFields()[i]._field_value.substr(0, pos).c_str());
-                                        else
-                                            content_length = atoi(test.getHeaderFields()[i]._field_value.substr(0, test.getHeaderFields()[i]._field_value.length()).c_str());
-                                        std::cout << "Content-length = " << content_length << std::endl;
-                                        break;
-                                    }
-                                }
-                                if (content_length != -1)
-                                {
-                                    int rtn = 0;
-                                    while (content_length)
-                                    {
-                                        bzero(buffer, 40000);
-                                        if ((rtn = this->receiveConnection(i, buffer, 40000)) < 0)
-                                        {
-                                            max_sd = this->closeConnection(i, max_sd, &master_set);
-                                            throw(throwMessage("Connection closed during content getting."));
-                                        }
-                                        else
-                                        {
-                                            test.pushContent(buffer);
-                                            if (rtn != 1)
-                                                break;
-                                        }
-                                    }
-                                    std::cout << "FINAL CONTENT = " << test.getContent();
-                                }
-                                
+                                // int content_length = -1;
+                                // for (size_t i = 0; i < test.getHeaderFields().size(); i++)
+                                // {
+                                //     DEBUG("Header name = " << test.getHeaderFields()[i]._field_name)
+                                //     if (test.getHeaderFields()[i]._field_name == "Content-Length")
+                                //     {
+                                //         size_t pos = test.getHeaderFields()[i]._field_value.find(':');
+                                //         if (pos != std::string::npos)
+                                //             content_length = atoi(test.getHeaderFields()[i]._field_value.substr(0, pos).c_str());
+                                //         else
+                                //             content_length = atoi(test.getHeaderFields()[i]._field_value.substr(0, test.getHeaderFields()[i]._field_value.length()).c_str());
+                                //         std::cout << "Content-length = " << content_length << std::endl;
+                                //         break;
+                                //     }
+                                // }
                                 treat(i, test, last.getServerConfiguration());  //Temporary
                             }
                             catch (const std::exception& e)

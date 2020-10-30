@@ -73,8 +73,10 @@ std::string RequestInterpretor::getResponse(void)
 	}
 	if (method == "GET")
 		return _get(ressource_path, headers);
-	if (method == "HEAD")
+	else if (method == "HEAD")
 		return _head(ressource_path, headers);
+	else if (method == "POST")
+		return _get(ressource_path, headers);
 	return ("");
 }
 
