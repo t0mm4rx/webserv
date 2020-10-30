@@ -29,7 +29,10 @@ std::string CGI::getOutput(void)
 
 	args = _getParams();
 	args_converted = _convertParams(args);
-	res = _execCGI(args_converted);
+	try
+	{ res = _execCGI(args_converted); }
+	catch (std::exception & e)
+	{ throwError(e); }
 	return (res);
 }
 
@@ -44,27 +47,37 @@ std::string CGI::_execCGI(char **args)
 	int exec_res;
 	char **exec_args;
 	int tmp_fd;
+	int fd[2];
 
 	exec_args = _getExecArgs();
+	if (pipe(fd) == -1)
+		throw(throwMessageErrno("Cgi pipe initialisation"));
 	pid = fork();
 	if (pid == 0)
 	{
+		close(fd[1]);
+		dup2(fd[0], 0);
 		tmp_fd = open("/tmp/webserv_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (tmp_fd < 0)
 			return ("Error");
 		dup2(tmp_fd, 1);
 		dup2(tmp_fd, 2);
-		close(0);
 		exec_res = execve(_cgi_path.c_str(), exec_args, args);
+		close(0);
 		close(tmp_fd);
+		close(fd[0]);
 		exit(0);
 	}
 	else
 	{
+		close(fd[0]);
+		write(fd[1], _request.getContent().c_str(), _request.getContent().length());
+		close(fd[1]);
 		waitpid(-1, NULL, 0);
 		_freeArgs(args);
 		_freeArgs(exec_args);
 	}
+	DEBUG("=========\nFILE CONTENT = \n" << readFile("/tmp/webserv_cgi") << "\n=============\n")
 	return (readFile("/tmp/webserv_cgi"));
 }
 
@@ -150,15 +163,25 @@ std::map<std::string, std::string> CGI::_getParams(void)
 	std::string tmp;
 	size_t i;
 	size_t j;
-
-	args["CONTENT_LENGTH"] = "0";
+	
 	args["GATEWAY_INTERFACE"] = "CGI/1.1";
 	args["PATH_INFO"] = _removeQueryArgs(_request.getRequestLine()._request_target);
 	args["PATH_TRANSLATED"] = _ressource_path;
 	args["QUERY_STRING"] = _getQueryString();
 	args["REQUEST_METHOD"] = _request.getRequestLine()._method;
+
+	args["CONTENT_LENGTH"] = uIntegerToString(_request.getContent().length());
+
+	for (size_t u = 0; u < _request.getHeaderFields().size(); u++)
+		if (_request.getHeaderFields()[u]._field_name == "Content-Type")
+		{
+			DEBUG("CONTENT GIVEN = " << _request.getHeaderFields()[u]._field_value)
+			args["CONTENT_TYPE"] = _request.getHeaderFields()[u]._field_value;
+		}
+	
 	args["REQUEST_URI"] = _removeQueryArgs(_request.getRequestLine()._request_target);
 	args["REMOTE_IDENT"] = "";
+	args["REDIRECT_STATUS"] = "200";
 	args["REMOTE_ADDR"] = "127.0.0.1";
 	args["SCRIPT_NAME"] = _getScriptName();
 	args["SCRIPT_FILENAME"] = _ressource_path;
