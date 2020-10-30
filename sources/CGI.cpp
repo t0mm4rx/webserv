@@ -77,7 +77,7 @@ std::string CGI::_execCGI(char **args)
 		_freeArgs(args);
 		_freeArgs(exec_args);
 	}
-	DEBUG("=========\nFILE CONTENT = \n" << readFile("/tmp/webserv_cgi") << "\n=============\n")
+	// DEBUG("=========\nFILE CONTENT = \n" << readFile("/tmp/webserv_cgi") << "\n=============\n")
 	return (readFile("/tmp/webserv_cgi"));
 }
 
@@ -167,7 +167,6 @@ std::map<std::string, std::string> CGI::_getParams(void)
 	args["GATEWAY_INTERFACE"] = "CGI/1.1";
 	// args["PATH_INFO"] = _removeQueryArgs(_request.getRequestLine()._request_target);
 	// args["PATH_INFO"] = _location.root;
-	// args["PATH_INFO"] = "/";
 	// args["PATH_INFO"] = replace(_request.getRequestLine()._request_target, );
 	args["PATH_TRANSLATED"] = _ressource_path;
 	args["QUERY_STRING"] = _getQueryString();
@@ -189,6 +188,8 @@ std::map<std::string, std::string> CGI::_getParams(void)
 	args["REMOTE_ADDR"] = _request.getClientIP();
 	// args["SCRIPT_NAME"] = _getScriptName();
 	args["SCRIPT_NAME"] = _removeQueryArgs(replace(_ressource_path, _location.root, "/"));
+	args["PATH_INFO"] = replace(_request.getRequestLine()._request_target, args["SCRIPT_NAME"], "");
+	std::cout << "PATH INFO = " << args["PATH_INFO"] << std::endl;
 	args["SCRIPT_FILENAME"] = _ressource_path;
 	args["SERVER_NAME"] = _conf.host;
 	args["SERVER_PORT"] = uIntegerToString(_conf.port);
