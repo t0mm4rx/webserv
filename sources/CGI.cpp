@@ -155,7 +155,7 @@ char *CGI::_newStr(std::string source)
 /**
  * Get the CGI params
  * @return a map of the CGI param to execute
- * @todo implement AUTH_TYPE, CONTENT_LENGTH, CONTENT_TYPE, REMOTE_ADDR, REMOTE_IDENT, REMOTE_USER
+ * @todo implement AUTH_TYPE, REMOTE_ADDR, REMOTE_IDENT, REMOTE_USER
  */
 std::map<std::string, std::string> CGI::_getParams(void)
 {
