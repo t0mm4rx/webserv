@@ -51,6 +51,22 @@ std::string RequestInterpretor::getResponse(void)
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
 	ressource_path += _ressource;
+	{
+		std::string save = replace(ressource_path, "/", " ");
+		std::vector<std::string> split = splitWhitespace(save);
+		size_t i;
+		std::string final_str;
+
+		for (i = 0; i < split.size(); i++)
+		{
+			final_str += "/";
+			final_str += split[i];
+			if (_shouldCallCGI(split[i]) && pathType(final_str, NULL) == 1)
+				break;
+		}
+		ressource_path = final_str;
+		std::cout << "FINAL RESSOURCE _PATH = " << ressource_path << std::endl;
+	}
 	if (pathType(ressource_path, NULL) == 2)
 	{
 		if (pathType(ressource_path + _location.index, NULL) == 1)
@@ -535,6 +551,7 @@ bool RequestInterpretor::_shouldCallCGI(std::string ressource_path)
 	ext = std::string(ressource_path, i + 1, ressource_path.size() - i);
 	for (size_t j = 0; j < _location.cgi_extension.size(); ++j)
 	{
+		DEBUG("EXT = " << ext)
 		if (_location.cgi_extension[j] == ext)
 			return (true);
 	}
