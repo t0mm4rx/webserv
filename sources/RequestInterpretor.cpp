@@ -63,7 +63,7 @@ std::string RequestInterpretor::getResponse(void)
 				return (_generateResponse(403, headers, method != "HEAD" ? _getErrorHTMLPage(403) : ""));
 		}
 	}
-	if (pathType(ressource_path, NULL) == 0)
+	if (pathType(ressource_path, NULL) == 0 && method != "PUT")
 		return (_generateResponse(404, headers, method != "HEAD" ? _getErrorHTMLPage(404) : ""));
 	DEBUG("ressource path: " + ressource_path);
 	if (_shouldCallCGI(ressource_path))
@@ -77,6 +77,8 @@ std::string RequestInterpretor::getResponse(void)
 		return _head(ressource_path, headers);
 	else if (method == "POST")
 		return _get(ressource_path, headers);
+	else if (method == "PUT")
+		return (_put(ressource_path, headers));
 	return ("");
 }
 
@@ -117,6 +119,58 @@ std::string RequestInterpretor::_get(std::string ressource_path, std::map<std::s
 std::string RequestInterpretor::_head(std::string ressource_path, std::map<std::string, std::string> headers)
 {
 	return (_get(ressource_path, headers, false));
+}
+
+/**
+ * 	@brief Performs a PUT request.
+ *	@param ressource_path the path of the ressource to GET on the disk
+ * 	@return the string representation of the HTTP response
+ */
+std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::string, std::string> headers)
+{
+	struct stat   buffer;
+	int fd = -1;
+	int rtn = 0;
+
+	try
+	{
+		if ((stat(ressource_path.c_str(), &buffer) == 0))
+		{
+			if ((fd = open(ressource_path.c_str(), O_WRONLY | O_TRUNC, 0644)) == -1)
+				throw(throwMessageErrno("Create file on put"));
+			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
+			close(fd);
+			rtn = 204;
+		}
+		else
+		{
+			if (_header_block.getRequestLine()._request_target.find_last_of('/') != std::string::npos
+				&& _header_block.getRequestLine()._request_target.find_last_of('/') != _header_block.getRequestLine()._request_target.find_first_of('/'))
+			{
+				std::string dir = ressource_path;
+				std::cout << "DIR = " << dir << std::endl;
+				dir = dir.substr(0, dir.find_last_of('/'));
+				std::cout << "DIR = " << dir << std::endl;
+				DIR* dir_pointer = opendir(dir.c_str());
+				if (dir_pointer)
+					closedir(dir_pointer);
+				else
+					if (errno != ENOENT || mkdir(dir.c_str(), 0777) == -1)
+						throw(throwMessageErrno("Create directory on put"));
+			}
+			if ((fd = open(ressource_path.c_str(), O_WRONLY | O_APPEND | O_CREAT, 0644)) == -1)
+				throw(throwMessageErrno("Create file on put"));
+			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
+			close(fd);
+			rtn = 201;
+		}
+		headers["Content-Location"] = _header_block.getRequestLine()._request_target;
+	}
+	catch (std::exception & ex)
+	{
+		throwError(ex);
+	}
+	return (_generateResponse(rtn, headers, ""));
 }
 
 /**

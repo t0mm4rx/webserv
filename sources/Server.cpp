@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/29 18:11:04 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/10/30 15:17:26 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,6 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
     int new_sd = 0;
 
     DEBUG("Readable socket")
-
 
     do
     {
