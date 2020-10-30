@@ -165,7 +165,10 @@ std::map<std::string, std::string> CGI::_getParams(void)
 	size_t j;
 	
 	args["GATEWAY_INTERFACE"] = "CGI/1.1";
-	args["PATH_INFO"] = _removeQueryArgs(_request.getRequestLine()._request_target);
+	// args["PATH_INFO"] = _removeQueryArgs(_request.getRequestLine()._request_target);
+	// args["PATH_INFO"] = _location.root;
+	// args["PATH_INFO"] = "/";
+	// args["PATH_INFO"] = replace(_request.getRequestLine()._request_target, );
 	args["PATH_TRANSLATED"] = _ressource_path;
 	args["QUERY_STRING"] = _getQueryString();
 	args["REQUEST_METHOD"] = _request.getRequestLine()._method;
@@ -179,11 +182,13 @@ std::map<std::string, std::string> CGI::_getParams(void)
 			args["CONTENT_TYPE"] = _request.getHeaderFields()[u]._field_value;
 		}
 	
-	args["REQUEST_URI"] = _removeQueryArgs(_request.getRequestLine()._request_target);
+	// args["REQUEST_URI"] = _removeQueryArgs(_request.getRequestLine()._request_target);
+	args["REQUEST_URI"] = _removeQueryArgs(replace(_ressource_path, _location.root, "/"));
 	args["REMOTE_IDENT"] = "";
 	args["REDIRECT_STATUS"] = "200";
-	args["REMOTE_ADDR"] = "127.0.0.1";
-	args["SCRIPT_NAME"] = _getScriptName();
+	args["REMOTE_ADDR"] = _request.getClientIP();
+	// args["SCRIPT_NAME"] = _getScriptName();
+	args["SCRIPT_NAME"] = _removeQueryArgs(replace(_ressource_path, _location.root, "/"));
 	args["SCRIPT_FILENAME"] = _ressource_path;
 	args["SERVER_NAME"] = _conf.host;
 	args["SERVER_PORT"] = uIntegerToString(_conf.port);

@@ -66,6 +66,7 @@ class HeadersBlock
         struct status_line getStatusLine(void) const;
         std::vector<struct header_field> getHeaderFields(void) const;
         std::string getContent(void) const;
+		std::string getClientIP(void) const;
 };
 
 std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb);
