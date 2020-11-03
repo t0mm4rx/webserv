@@ -339,10 +339,10 @@ std::string RequestInterpretor::_getMIMEType(std::string filename)
 	std::string ext;
 	size_t i;
 
-	i = 0;
-	while (filename[i] && filename[i] != '.')
-		++i;
-	if (i >= filename.size())
+	i = filename.size() - 1;
+	while (i > 0 && filename[i] != '.')
+		--i;
+	if (i == 0)
 		return ("text/plain");
 	ext = std::string(filename, i + 1, filename.size() - i);
 	m["aac"] = "audio/aac";

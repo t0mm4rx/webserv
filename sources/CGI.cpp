@@ -175,12 +175,13 @@ std::map<std::string, std::string> CGI::_getParams(void)
 			DEBUG("CONTENT GIVEN = " << _request.getHeaderFields()[u]._field_value)
 			args["CONTENT_TYPE"] = _request.getHeaderFields()[u]._field_value;
 		}
-	args["REQUEST_URI"] = _removeQueryArgs(replace(_ressource_path, _location.root, "/"));
+	// args["REQUEST_URI"] = _removeQueryArgs(replace(_ressource_path, _location.root, "/"));
+	args["REQUEST_URI"] = _removeQueryArgs(_request.getRequestLine()._request_target);
 	args["REMOTE_IDENT"] = "";
 	args["REDIRECT_STATUS"] = "200";
 	args["REMOTE_ADDR"] = _request.getClientIP();
 	args["SCRIPT_NAME"] = _location.name + "/" + replace(_ressource_path, _location.root, "");
-	args["PAH_INFO"] = "";
+	args["PATH_INFO"] = "";
 	args["SCRIPT_FILENAME"] = _ressource_path;
 	args["SERVER_NAME"] = _conf.host;
 	args["SERVER_PORT"] = uIntegerToString(_conf.port);
