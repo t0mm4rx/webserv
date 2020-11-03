@@ -51,6 +51,8 @@ std::string RequestInterpretor::getResponse(void)
 		return (_wrongMethod());
 	if (method == "TRACE")
 		return (_trace(headers));
+	if (method == "OPTIONS")
+		return (_options(headers));
 	ressource_path = _location.root;
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
@@ -186,6 +188,26 @@ std::string RequestInterpretor::_trace(std::map<std::string, std::string> header
 {
 	headers["Content-Type"] = "message/http";
 	return (_generateResponse(200, headers, _header_block.getPlainRequest()));
+}
+
+/**
+ * Performs an OPTIONS request.
+ * @param headers a map representing HTTP headers of the reponse.
+ * @return the string representation of the HTTP response
+ */
+std::string RequestInterpretor::_options(std::map<std::string, std::string> headers)
+{
+	headers.erase("Content-Type");
+	std::string allowed;
+
+	for (size_t i = 0; i < _location.methods.size(); ++i)
+	{
+		allowed += _location.methods[i];
+		if (i < _location.methods.size() - 1)
+			allowed += ", ";
+	}
+	headers["Allow"] = allowed;
+	return (_generateResponse(200, headers, ""));
 }
 
 /**

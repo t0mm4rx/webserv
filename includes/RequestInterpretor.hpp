@@ -25,6 +25,7 @@ class RequestInterpretor
 		std::string _head(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _put(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _trace(std::map<std::string, std::string> headers);
+		std::string _options(std::map<std::string, std::string> headers);
 		std::string _wrongMethod(void);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, std::string content);
 		std::string _generateResponse(size_t code, std::map<std::string, std::string> headers, const unsigned char *content, size_t content_size);
