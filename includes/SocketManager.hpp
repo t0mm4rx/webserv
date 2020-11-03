@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 22:45:21 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/28 17:13:30 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/03 17:00:16 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,17 @@ class SocketManager
          */
         void registerSocket(T *socket)
         {
+            bool has_default = false;
+            std::vector<Configuration::server> tmp;
+            
+            for (size_t i = 0; i < this->_sockets.size(); i++)
+                if (this->_sockets[i]->getServerConfiguration().port == ((Socket *)socket)->getServerConfiguration().port)
+                    for (size_t j = 0; j < this->_sockets[i]->getServerConfiguration().names.size(); j++)
+                        if (this->_sockets[i]->getServerConfiguration().names[j] == "default_server")
+                            has_default = true;
+
+            std::cout << "HAS DEFAULT = " << has_default << " | true = " << true << std::endl;
+            ((Socket *)socket)->setToDefault();
             this->_sockets.push_back(socket);
         }
 
