@@ -49,6 +49,8 @@ std::string RequestInterpretor::getResponse(void)
 		return (_generateResponse(413, headers, _getErrorHTMLPage(413)));
 	if (!_isMethodAllowed(method))
 		return (_wrongMethod());
+	if (method == "TRACE")
+		return (_trace(headers));
 	ressource_path = _location.root;
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
@@ -173,6 +175,17 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 		throwError(ex);
 	}
 	return (_generateResponse(rtn, headers, ""));
+}
+
+/**
+ * Performs a TRACE request.
+ * @param headers a map representing HTTP headers of the reponse.
+ * @return the string representation of the HTTP response
+ */
+std::string RequestInterpretor::_trace(std::map<std::string, std::string> headers)
+{
+	headers["Content-Type"] = "message/http";
+	return (_generateResponse(200, headers, _header_block.getPlainRequest()));
 }
 
 /**

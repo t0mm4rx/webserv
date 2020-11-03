@@ -231,7 +231,8 @@ HeadersBlock::HeadersBlock(const std::string & block, const std::string & client
 :
     _is_request(false),
     _client_ip(client_ip),
-    _content()
+    _content(),
+	_raw_request(block)
 {
     std::vector<std::string> lines;
 
@@ -288,7 +289,8 @@ HeadersBlock::HeadersBlock(const HeadersBlock& copy)
     _header_fields(copy._header_fields),
     _is_request(copy._is_request),
     _client_ip(copy._client_ip),
-    _content(copy._content)
+    _content(copy._content),
+	_raw_request(copy._raw_request)
 {}
 
 HeadersBlock::~HeadersBlock()
@@ -304,6 +306,7 @@ HeadersBlock &HeadersBlock::operator=(const HeadersBlock& op)
     _is_request = op._is_request;
     _client_ip = op._client_ip;
     _content = op._content;
+	_raw_request = op._raw_request;
     return (*this);
 }
 
@@ -370,4 +373,14 @@ std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb)
 std::string HeadersBlock::getClientIP(void) const
 {
 	return (_client_ip);
+}
+
+/**
+ * Get the string plain request.
+ * @return the string representation of the request received.
+ */
+std::string HeadersBlock::getPlainRequest(void) const
+{
+	std::cout << "MIP" << _raw_request << std::endl;
+	return (_raw_request);
 }

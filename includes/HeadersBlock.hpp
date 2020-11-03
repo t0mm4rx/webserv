@@ -47,6 +47,7 @@ class HeadersBlock
         bool                                _is_request;
         std::string                         _client_ip;
         std::string                         _content;
+		std::string							_raw_request;
 
         void    getLines(std::string msg, std::vector<std::string> *lines);
         void    getRequestLine(std::vector<std::string> lines);
@@ -67,6 +68,7 @@ class HeadersBlock
         std::vector<struct header_field> getHeaderFields(void) const;
         std::string getContent(void) const;
 		std::string getClientIP(void) const;
+		std::string getPlainRequest(void) const;
 };
 
 std::ostream &operator<<(std::ostream &out, const HeadersBlock &hb);
