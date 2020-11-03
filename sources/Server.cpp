@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/03 21:53:30 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/04 00:08:29 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,16 +113,25 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
  */
 int Server::receiveConnection(int sd, char *buffer, int buffer_size)
 {
-    int rc = recv(sd, buffer, buffer_size, 0);
-    if (rc <= 0)
+    int rc = 0;
+    char buffer_recv[1];
+    int i = 0;
+
+    while (42 && i < buffer_size)
     {
-        if (rc == 0)
-            std::cout << "Connection closed...\n";
-        else if (errno != EWOULDBLOCK)
-            throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
-        return (-1);
+        bzero(buffer_recv, 1);
+        rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+        buffer[i++] = buffer_recv[0];
+        if (rc <= 0 || buffer_recv[0] == 4)
+        {
+            if (rc == 0)
+                std::cout << "Connection closed...\n";
+            else if (errno != EWOULDBLOCK)
+                throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
+            break;
+        }
     }
-    return((rc >= buffer_size) ? 1 : 0);
+    return((i >= buffer_size) ? 1 : 0);
 }
 
 /**
