@@ -45,6 +45,8 @@ std::string RequestInterpretor::getResponse(void)
 	std::string ressource_path;
 
 	headers["Content-Type"] = _getMIMEType("a.html");
+	if (_header_block.getContent().size() > _conf.client_max_body_size)
+		return (_generateResponse(413, headers, _getErrorHTMLPage(413)));
 	if (!_isMethodAllowed(method))
 		return (_wrongMethod());
 	ressource_path = _location.root;
@@ -316,15 +318,21 @@ std::string RequestInterpretor::_getListingHTMLPage(std::string path, std::strin
 {
 	std::string base;
 	std::string listing;
+	std::string link_base;
+	size_t i;
 	struct dirent *en;
 	DIR *dr;
 
-	(void)path;
 	base = readFile("./assets/listing.html");
 	base = replace(base, "$1", ressource);
 	dr = opendir(path.c_str());
+	i = 0;
+	while (_header_block.getRequestLine()._request_target[i] && _header_block.getRequestLine()._request_target[i] != '?')
+		link_base += _header_block.getRequestLine()._request_target[i++];
+	if (link_base[link_base.size() - 1] != '/')
+		link_base += '/';
 	while ((en = readdir(dr)) != 0)
-		listing += "<li><a href=\"" + ressource + "/" + std::string(en->d_name) +  "\">" + std::string(en->d_name) + "/</a></li>";
+		listing += "<li><a href=\"" + link_base + std::string(en->d_name) +  "\">" + std::string(en->d_name) + "</a></li>";
 	closedir(dr);
 	base = replace(base, "$2", listing);
 	return (base);
