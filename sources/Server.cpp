@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/30 15:17:26 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/03 21:53:30 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,9 +175,45 @@ std::string Server::getServerName(const HeadersBlock& hb)
     return (server_name);
 }
 
+template <class T>
+static bool vector_contain(std::vector<T> tab, T obj)
+{
+    for (size_t i = 0; i < tab.size(); i++)
+        if (tab[i] == obj)
+            return (true);
+    return (false);
+}
+
 //WIP
 void Server::loop()
 {
+    {
+        int actual_check = -1;
+        std::vector<int>    checked_ports;
+        std::vector<Socket *> actual_set;
+        
+        for (size_t i = 0; i < this->_sm.getSockets().size(); i++)
+        {
+            actual_check = this->_sm.getSockets()[i]->getServerConfiguration().port;
+            if (vector_contain<int>(checked_ports, actual_check) == false)
+            {
+                bool has_default = false;
+                for (size_t j = 0; j < this->_sm.getSockets().size(); j++)
+                    if ((int)this->_sm.getSockets()[j]->getServerConfiguration().port == actual_check)
+                        actual_set.push_back(this->_sm.getSockets()[j]);
+
+                for (size_t f = 0; f < actual_set.size(); f++)
+                    if (vector_contain<std::string>(actual_set[f]->getServerConfiguration().names, "default_server") == true)
+                        has_default = true;
+                
+                if (has_default == false)
+                    actual_set[0]->setToDefault();
+
+                checked_ports.push_back(actual_check);
+            }
+        }
+    }
+    
     fd_set  working_set;
     fd_set  master_set;
     int     socket_ready;
