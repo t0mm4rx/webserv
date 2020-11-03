@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:34:20 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/24 22:50:32 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/03 16:57:45 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class Socket
 
 		int								getSocketDescriptor(void);
 		struct Configuration::server	getServerConfiguration(void);
+		void							setToDefault(void);
 };
 
 #endif

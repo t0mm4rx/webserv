@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:38:43 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/30 15:17:51 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/03 16:59:34 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,4 +183,9 @@ int Socket::getSocketDescriptor(void)
 struct Configuration::server	Socket::getServerConfiguration(void)
 {
 	return (this->_server_config);
+}
+
+void							Socket::setToDefault(void)
+{
+	this->_server_config.names.push_back("default_server");
 }
