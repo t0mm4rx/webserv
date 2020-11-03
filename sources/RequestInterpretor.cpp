@@ -44,7 +44,7 @@ std::string RequestInterpretor::getResponse(void)
 	std::string method = _header_block.getRequestLine()._method;
 	std::string ressource_path;
 
-	headers["Content-Type"] = _getMIMEType(".html");
+	headers["Content-Type"] = _getMIMEType("a.html");
 	if (!_isMethodAllowed(method))
 		return (_wrongMethod());
 	ressource_path = _location.root;
@@ -298,6 +298,8 @@ std::string RequestInterpretor::_getErrorHTMLPage(size_t code)
 {
 	std::string base;
 
+	if (_conf.error_pages.count(code) > 0)
+		return (readFile(_conf.error_pages[code]));
 	base = readFile("./assets/error.html");
 	base = replace(base, "$1", uIntegerToString(code));
 	base = replace(base, "$2", _getStatusDescription(code));

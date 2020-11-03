@@ -266,10 +266,6 @@ Configuration::server Configuration::_defaultServer(void)
 
 	s.port = 80;
 	s.host = "127.0.0.1";
-	s.error_pages[405] = "./assets/405.html";
-	s.error_pages[404] = "./assets/404.html";
-	s.error_pages[403] = "./assets/403.html";
-	s.error_pages[401] = "./assets/401.html";
 	s.client_max_body_size = 1048576;
 	return (s);
 }
