@@ -45,14 +45,16 @@ std::string RequestInterpretor::getResponse(void)
 	std::string ressource_path;
 
 	headers["Content-Type"] = _getMIMEType("a.html");
-	if (_header_block.getContent().size() > _conf.client_max_body_size)
+	if (_header_block.getContent().size() > _location.client_max_body_size)
 		return (_generateResponse(413, headers, _getErrorHTMLPage(413)));
 	if (!_isMethodAllowed(method))
 		return (_wrongMethod());
 	if (method == "TRACE")
 		return (_trace(headers));
-	if (method == "OPTIONS")
+	else if (method == "OPTIONS")
 		return (_options(headers));
+	else if (method == "CONNECT")
+		return (_generateResponse(200, headers, ""));
 	ressource_path = _location.root;
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
@@ -75,7 +77,15 @@ std::string RequestInterpretor::getResponse(void)
 	if (_shouldCallCGI(ressource_path))
 	{
 		DEBUG("call CGI for this request");
-		return (_addCGIHeaders(CGI(_location.cgi_path, ressource_path, _header_block, _conf, _location).getOutput()));
+		try
+		{
+			return (_addCGIHeaders(CGI(_location.cgi_path, ressource_path, _header_block, _conf, _location).getOutput()));
+		}
+		catch (const std::exception &e)
+		{
+			std::cout << e.what() << std::endl;
+			return (_generateResponse(500, headers, _getErrorHTMLPage(500)));
+		}
 	}
 	if (method == "GET")
 		return _get(ressource_path, headers);
@@ -98,7 +108,6 @@ std::string RequestInterpretor::_get(std::string ressource_path, std::map<std::s
 	std::vector<unsigned char> content_bytes;
 	unsigned char *ressource_content;
 	time_t file_date;
-
 	try
 	{
 		content_bytes = readBinaryFile(ressource_path);

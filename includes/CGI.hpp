@@ -35,4 +35,20 @@ class CGI
 
 };
 
+class CGIException : public std::exception
+{
+	private:
+		std::string _msg;
+	public:
+		CGIException(std::string message="Unable to execute CGI.")
+		: _msg(message)
+		{};
+		~CGIException() throw()
+		{};
+		const char *what () const throw ()
+		{
+			return (_msg.c_str());
+		};
+};
+
 #endif
