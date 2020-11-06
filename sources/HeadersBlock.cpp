@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/06 16:13:15 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/06 17:38:46 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,11 +243,14 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
 
     // this->getLines(block, &lines);
 
-    size_t pos = block_lines[0].find(" ");
-    std::string first_word = block_lines[0].substr(0, block_lines[0].find(" "));
+
 
     try
     {
+        if (block_lines.size() < 1)
+            throw(throwMessage("Not valid header (size to low)"));
+        size_t pos = block_lines[0].find(" ");
+        std::string first_word = block_lines[0].substr(0, block_lines[0].find(" "));
         if (pos != std::string::npos)
         {
             int methods_number = 0;
