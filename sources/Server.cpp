@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/06 17:14:04 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/06 17:33:08 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,13 +288,7 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
             }
             else if (errno != EWOULDBLOCK)
                 throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
-            if (errno != EWOULDBLOCK)
-                break;
-            exit(1);
-            // if (headers_ended != false)
-            //     break;
-            // else
-            //     headers_ended = true;
+            break;
         }
     }
     return(0);
@@ -443,7 +437,7 @@ void Server::loop()
                                 //     }
                                 // }
                                 std::cout << "TREAT" << std::endl;
-                                treat(i, test, last.getServerConfiguration());  //Temporary
+                                treat(i, working_set, test, last.getServerConfiguration());  //Temporary
                                 std::cout << "END TREAT" << std::endl;
                             }
                             catch (const std::exception& e)
