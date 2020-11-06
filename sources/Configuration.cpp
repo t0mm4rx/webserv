@@ -6,6 +6,7 @@ Configuration::Configuration(void)
 Configuration::Configuration(std::string file)
 {
 	_parseConfig(file);
+	_completeConfig();
 }
 
 Configuration &Configuration::operator=(const Configuration &other)
@@ -88,7 +89,6 @@ void Configuration::_parseServer(std::string source, size_t line_start, size_t l
 void Configuration::_parseServerProperty(std::string source, size_t n, server &s)
 {
 	std::vector<std::string> line;
-	char last;
 	
 	line = parseProperty(source, n, "server");
 	if (line[0] == server_properties[0])
@@ -111,18 +111,7 @@ void Configuration::_parseServerProperty(std::string source, size_t n, server &s
 	}
 	if (line[0] == server_properties[3])
 	{
-		if (line.size() != 2)
-			throw ParsingException(n, std::string(server_properties[3]) + " <size[K,M,G]>;");
-		s.client_max_body_size = uIntegerParam(line[1], n);
-		last = line[1][line[1].size() - 1];
-		if (last == 'K' || last == 'k')
-			s.client_max_body_size *= 1024;
-		else if (last == 'M' || last == 'm')
-			s.client_max_body_size *= 1024 * 1024;
-		else if (last == 'G' || last == 'G')
-			s.client_max_body_size *= 1024 * 1024 * 1024;
-		else if (!std::isdigit(last))
-			throw ParsingException(n, std::string(server_properties[3]) + " <size[K,M,G]>;");
+		s.root = line[1];
 	}
 }
 
@@ -160,6 +149,7 @@ Configuration::location Configuration::_parseLocation(std::string source, size_t
 void Configuration::_parseLocationProperty(std::string source, size_t n, location &l)
 {
 	std::vector<std::string> line;
+	char last;
 
 	line = parseProperty(source, n, "route");
 	if (line[0] == route_properties[0])
@@ -189,6 +179,21 @@ void Configuration::_parseLocationProperty(std::string source, size_t n, locatio
 		l.upload_enable = boolParam(line[1], n);
 	if (line[0] == route_properties[7])
 		l.upload_path = line[1];
+	if (line[0] == route_properties[8])
+	{
+		if (line.size() != 2)
+			throw ParsingException(n, std::string(server_properties[3]) + " <size[K,M,G]>;");
+		l.client_max_body_size = uIntegerParam(line[1], n);
+		last = line[1][line[1].size() - 1];
+		if (last == 'K' || last == 'k')
+			l.client_max_body_size *= 1024;
+		else if (last == 'M' || last == 'm')
+			l.client_max_body_size *= 1024 * 1024;
+		else if (last == 'G' || last == 'G')
+			l.client_max_body_size *= 1024 * 1024 * 1024;
+		else if (!std::isdigit(last))
+			throw ParsingException(n, std::string(server_properties[3]) + " <size[K,M,G]>;");
+	}
 }
 
 /**
@@ -208,7 +213,7 @@ void Configuration::print(void)
 		std::cout << std::endl;
 		std::cout << "   * host: " + _servers[i].host << std::endl;
 		std::cout << "   * port: " + uIntegerToString(_servers[i].port) << std::endl;
-		std::cout << "   * client_max_body_size: " + uIntegerToString(_servers[i].client_max_body_size) << std::endl;
+		std::cout << "   * root: " + _servers[i].root << std::endl;
 		it = _servers[i].error_pages.begin();
 		while (it != _servers[i].error_pages.end())
 		{
@@ -232,6 +237,7 @@ void Configuration::print(void)
 			std::cout << "     * autoindex: " << it2->autoindex << std::endl;
 			std::cout << "     * upload_enable: " << it2->upload_enable << std::endl;
 			std::cout << "     * upload_path: " << it2->upload_path << std::endl;
+			std::cout << "     * client_max_body_size: " + uIntegerToString(it2->client_max_body_size) << std::endl;
 			++it2;
 		}
 	}
@@ -254,6 +260,15 @@ void Configuration::_validateConfig(void)
 {
 	if (_servers.size() == 0)
 		throw ParsingException(0, "Your configuration file must provide at least one server.");
+	for (size_t i = 0; i < _servers.size(); ++i)
+	{
+		for (size_t j = 0; j < _servers[i].locations.size(); ++j)
+		{
+			if (_servers[i].locations[j].cgi_path.size() > 0 &&
+			pathType(_servers[i].locations[j].cgi_path, 0) != 1)
+				throw ParsingException(0, "The cgi path '" + _servers[i].locations[j].cgi_path + "' is not a valid file.");
+		}
+	}
 }
 
 /**
@@ -266,7 +281,7 @@ Configuration::server Configuration::_defaultServer(void)
 
 	s.port = 80;
 	s.host = "127.0.0.1";
-	s.client_max_body_size = 1048576;
+	s.root = "/www";
 	return (s);
 }
 
@@ -284,5 +299,23 @@ Configuration::location Configuration::_defaultLocation(void)
 	l.cgi_path = "";
 	l.upload_enable = false;
 	l.upload_path = "/www/uploads";
+	l.client_max_body_size = 1048576;
 	return (l);
+}
+
+/**
+ * If the config is valid but incomplete, we add default values.
+ */
+void Configuration::_completeConfig(void)
+{
+	for (size_t i = 0; i < _servers.size(); ++i)
+	{
+		if (_servers[i].locations.size() == 0)
+			_servers[i].locations.push_back(_defaultLocation());
+		for (size_t j = 0; j < _servers[i].locations.size(); ++j)
+		{
+			if (_servers[i].locations[j].methods.size() == 0)
+				_servers[i].locations[j].methods.push_back("GET");
+		}
+	}
 }

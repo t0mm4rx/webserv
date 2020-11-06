@@ -22,14 +22,15 @@ class Configuration
 			std::string cgi_path;
 			bool upload_enable;
 			std::string upload_path;
+			size_t client_max_body_size;
 		};
 		struct server
 		{
 			std::vector<std::string> names;
 			std::string host;
+			std::string root;
 			std::map<int, std::string> error_pages;
 			std::vector<location> locations;
-			size_t client_max_body_size;
 			size_t port;
 		};
 	private:
@@ -39,6 +40,7 @@ class Configuration
 		void _parseServerProperty(std::string source, size_t line, server &s);
 		void _parseLocationProperty(std::string source, size_t line, location &l);
 		void _validateConfig(void);
+		void _completeConfig(void);
 		server _defaultServer(void);
 		location _defaultLocation(void);
 		location _parseLocation(std::string source, size_t line_start, size_t line_end);

@@ -17,7 +17,7 @@ static const char* server_properties[] = {
 	"listen",
 	"server_name",
 	"error_page",
-	"client_max_body_size",
+	"root",
 	0
 };
 
@@ -30,6 +30,7 @@ static const char* route_properties[] = {
 	"cgi_path",
 	"upload_enable",
 	"upload_path",
+	"client_max_body_size",
 	0
 };
 

@@ -39,6 +39,7 @@ std::string CGI::getOutput(void)
 /**
  * Executes CGI, get its output
  * @param args the char** representation of CGI params
+ * @throw CGIException if an error occures
  * @return the string output of the CGI
  */
 std::string CGI::_execCGI(char **args)
@@ -51,7 +52,7 @@ std::string CGI::_execCGI(char **args)
 
 	exec_args = _getExecArgs();
 	if (pipe(fd) == -1)
-		throw(throwMessageErrno("Cgi pipe initialisation"));
+		throw CGIException("Cannot create pip to execute CGI.");
 	pid = fork();
 	if (pid == 0)
 	{
@@ -59,7 +60,7 @@ std::string CGI::_execCGI(char **args)
 		dup2(fd[0], 0);
 		tmp_fd = open("/tmp/webserv_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (tmp_fd < 0)
-			return ("Error");
+			throw CGIException("Cannot create temporary file to catch CGI output in /tmp.");
 		dup2(tmp_fd, 1);
 		dup2(tmp_fd, 2);
 		exec_res = execve(_cgi_path.c_str(), exec_args, args);
