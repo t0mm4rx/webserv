@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/30 15:17:26 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/05 18:43:59 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,18 +111,174 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManag
  *  @param buffer_size the size of the buffer.
  *  @return -1 if and error appear, 0 otherwise.
  */
-int Server::receiveConnection(int sd, char *buffer, int buffer_size)
+int Server::receiveConnection(int sd, std::vector<std::string>& request)
 {
-    int rc = recv(sd, buffer, buffer_size, 0);
-    if (rc <= 0)
+    int rc = 0;
+    char buffer_recv[1];
+    std::string line;
+    bool headers_ended = false;
+
+    /* CONTENT */
+    int             content_type = 0; /* 0 = No, 1 = Normal, 2 chunked */
+    int             content_len = 0;
+
+    while (42)
     {
-        if (rc == 0)
-            std::cout << "Connection closed...\n";
-        else if (errno != EWOULDBLOCK)
-            throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
-        return (-1);
+        bzero(buffer_recv, 1);
+        if (headers_ended == true)
+        {
+            if (content_type == 1)
+            {
+                std::cout << "NORMAL TYPE" << std::endl;
+                for (int i = 0; i < content_len; i++)
+                {
+                    buffer_recv[0] = 0;
+                    rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+                    if (buffer_recv[0] == '\r')
+                        i--;
+                    std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
+                    if (buffer_recv[0] == '\n' || i + 1 == content_len)
+                    {
+                        if (i + 1 == content_len)
+                            line += buffer_recv[0];
+                        std::cout << "line size " << line.length() << std::endl;
+                        request.push_back(line);
+                        line.clear();
+                    }
+                    else
+                        line += buffer_recv[0];
+
+                    if (rc <= 0)
+                    {
+                        if (rc == 0)
+                        {
+                            std::cout << "Connection closed...\n";
+                            return (-1);
+                        }
+                        else if (errno != EWOULDBLOCK)
+                            throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
+                        break;
+                    }
+                }
+            }
+            else if (content_type == 2)
+            {
+                while (42)
+                {
+                    std::cout << "PLOP ! \n";
+                    size_t chunk_size = 0;
+                    /* CONTENT SIZE OF CHUNK */
+                    while (42)
+                    {
+                        buffer_recv[0] = 0;
+                        rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+                        if (buffer_recv[0] == '\n')
+                        {
+                            std::cout << "LINE = " << line << std::endl;
+                            chunk_size = std::stoi(line.c_str(), 0, 16);
+                            std::cout << "Chunk Size = " << chunk_size << std::endl;
+                            line.clear();
+                            break;
+                        }
+                        else if (buffer_recv[0] != '\r')
+                            line += buffer_recv[0];
+
+                        if (rc <= 0)
+                        {
+                            if (rc == 0)
+                            {
+                                std::cout << "Connection closed...\n";
+                                return (-1);
+                            }
+                            else if (errno != EWOULDBLOCK)
+                                throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
+                            return (0);
+                        }
+                    }
+                    
+                    /* CONTENT OF CHUNK */
+                    for (size_t i = 0; i < chunk_size + 2; i++)
+                    {
+                        buffer_recv[0] = 0;
+                        rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+                        if (buffer_recv[0] == '\r')
+                            i--;
+                        std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
+                        if (buffer_recv[0] == '\n' || i + 1 == chunk_size)
+                        {
+                            if (i + 1 == chunk_size)
+                                line += buffer_recv[0];
+                            std::cout << "line size " << line.length() << std::endl;
+                            request.push_back(line);
+                            line.clear();
+                        }
+                        else
+                            line += buffer_recv[0];
+
+                        if (rc <= 0)
+                        {
+                            if (rc == 0)
+                            {
+                                std::cout << "Connection closed...\n";
+                                return (-1);
+                            }
+                            else if (errno != EWOULDBLOCK)
+                                throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
+                            break;
+                        }
+                    }
+                }
+            }
+            return (0);
+        }
+        else
+        {
+            buffer_recv[0] = 0;
+            rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+        }
+
+        if (buffer_recv[0] == '\n')
+        {
+            request.push_back(line);
+            if (line.length() == 1 && line[0] == '\r')
+            {
+                std::cout << "END OP\n";
+                headers_ended = true;
+            }
+            else
+            {
+                // std::cout << "Line = " << line << std::endl;
+                if (line.find("Content-Length: ") != std::string::npos)
+                {
+                    std::cout << "SUB = " << line.substr(std::string("Content-Length: ").length(), line.length() - 2) << std::endl;;
+                    content_len = atoi(line.substr(std::string("Content-Length: ").length(), line.length()).c_str());
+                    std::cout << "Content-Length IN: " << content_len << std::endl;
+                    content_type = 1;
+                }
+                else if (line.find("Transfer-Encoding: ") != std::string::npos)
+                {
+                    if (line.find("chunked") != std::string::npos)
+                        content_type = 2;
+                }
+            }
+            line.clear();
+        }
+        else
+            line += buffer_recv[0];
+
+        if (rc <= 0)
+        {
+            if (rc == 0)
+            {
+                std::cout << "Connection closed...\n";
+                return (-1);
+            }
+            else if (errno != EWOULDBLOCK)
+                throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
+            break;
+        }
     }
-    return((rc >= buffer_size) ? 1 : 0);
+    return(0);
 }
 
 /**
@@ -175,9 +331,45 @@ std::string Server::getServerName(const HeadersBlock& hb)
     return (server_name);
 }
 
+template <class T>
+static bool vector_contain(std::vector<T> tab, T obj)
+{
+    for (size_t i = 0; i < tab.size(); i++)
+        if (tab[i] == obj)
+            return (true);
+    return (false);
+}
+
 //WIP
 void Server::loop()
 {
+    {
+        int actual_check = -1;
+        std::vector<int>    checked_ports;
+        std::vector<Socket *> actual_set;
+        
+        for (size_t i = 0; i < this->_sm.getSockets().size(); i++)
+        {
+            actual_check = this->_sm.getSockets()[i]->getServerConfiguration().port;
+            if (vector_contain<int>(checked_ports, actual_check) == false)
+            {
+                bool has_default = false;
+                for (size_t j = 0; j < this->_sm.getSockets().size(); j++)
+                    if ((int)this->_sm.getSockets()[j]->getServerConfiguration().port == actual_check)
+                        actual_set.push_back(this->_sm.getSockets()[j]);
+
+                for (size_t f = 0; f < actual_set.size(); f++)
+                    if (vector_contain<std::string>(actual_set[f]->getServerConfiguration().names, "default_server") == true)
+                        has_default = true;
+                
+                if (has_default == false)
+                    actual_set[0]->setToDefault();
+
+                checked_ports.push_back(actual_check);
+            }
+        }
+    }
+    
     fd_set  working_set;
     fd_set  master_set;
     int     socket_ready;
@@ -200,10 +392,10 @@ void Server::loop()
                         max_sd = this->acceptConnection(i, max_sd, &master_set, sub_sm);
                     else
                     {
-                        char buffer[40000];
-                        bzero(buffer, 40000);
-                        
-                        if (this->receiveConnection(i, buffer, 40000) < 0)
+                        // char buffer[40000];
+                        // bzero(buffer, 40000);
+                        std::vector<std::string> lines;
+                        if (this->receiveConnection(i, lines) < 0)
                             max_sd = this->closeConnection(i, max_sd, &master_set);
                         else
                         {
@@ -212,7 +404,7 @@ void Server::loop()
                                 SubSocket client_socket = sub_sm.getBySD(i);
                                 // std::cout << "=================================" << std::endl;
                                 // std::cout << "BUFFER = \n" << buffer << std::endl << std::endl;
-                                HeadersBlock test(buffer, client_socket.getClientIp());
+                                HeadersBlock test(lines, client_socket.getClientIp());
                                 std::string server_name = this->getServerName(test);
                                 Socket last = this->_sm.getBySDandHost(client_socket.getParent().getSocketDescriptor(), server_name);
                                 
@@ -231,7 +423,9 @@ void Server::loop()
                                 //         break;
                                 //     }
                                 // }
+                                std::cout << "TREAT" << std::endl;
                                 treat(i, test, last.getServerConfiguration());  //Temporary
+                                std::cout << "END TREAT" << std::endl;
                             }
                             catch (const std::exception& e)
                             {

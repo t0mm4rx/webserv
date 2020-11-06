@@ -39,7 +39,7 @@ OBJECTS = $(addprefix $(OBJECTS_FOLDER), $(OBJECT))
 #===============================================================================
 
 # FLAGS ========================================================================
-FLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address -std=c++98
+FLAGS = -Wall -Wextra -Werror -g3 -fsanitize=address
 #===============================================================================
 
 DEBUG_VALUE = 0
