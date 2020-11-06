@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/05 17:01:19 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/06 16:13:15 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -239,7 +239,7 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
     for (size_t i = 0; i < block_lines.size(); i++)
         _raw_request += block_lines[i] + "\n";
     
-    std::cout << "RAW = [ \n" << _raw_request << "\n]\n"; 
+    std::cout << "RAW = [" << _raw_request << "]" << std::endl; 
 
     // this->getLines(block, &lines);
 
@@ -265,7 +265,9 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
             if (methods[i] == NULL)
                 this->getStatusLine(block_lines);
         }
+        std::cout << "\n\nplop\n\n";
         size_t end_headers = this->getHeaderFileds(block_lines);
+        std::cout << "\n\nplop2\n\n";
         while (42)
         {
             if (end_headers < block_lines.size() && block_lines[end_headers] == "\r")

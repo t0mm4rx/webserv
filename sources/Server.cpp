@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/05 18:43:59 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/06 16:45:21 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,6 +122,8 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
     int             content_type = 0; /* 0 = No, 1 = Normal, 2 chunked */
     int             content_len = 0;
 
+    std::cout << "           \n";
+    std::cout << "BUFFER = " << std::endl;
     while (42)
     {
         bzero(buffer_recv, 1);
@@ -133,7 +135,9 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                 for (int i = 0; i < content_len; i++)
                 {
                     buffer_recv[0] = 0;
-                    rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+                    std::cout << "BEGIN CONTENT 1\n";
+                    rc = read(sd, buffer_recv, 1);
+                    std::cout << "BEGIN CONTENT 2\n";
                     if (buffer_recv[0] == '\r')
                         i--;
                     std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
@@ -171,7 +175,7 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                     while (42)
                     {
                         buffer_recv[0] = 0;
-                        rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+                        rc = read(sd, buffer_recv, 1);
                         if (buffer_recv[0] == '\n')
                         {
                             std::cout << "LINE = " << line << std::endl;
@@ -196,11 +200,13 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                         }
                     }
                     
+                    if (chunk_size == 0)
+                        break;
                     /* CONTENT OF CHUNK */
                     for (size_t i = 0; i < chunk_size + 2; i++)
                     {
                         buffer_recv[0] = 0;
-                        rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+                        rc = read(sd, buffer_recv, 1);
                         if (buffer_recv[0] == '\r')
                             i--;
                         std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
@@ -229,12 +235,42 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                     }
                 }
             }
+            // else if (content_type == 0)
+            // {
+            //     while (42)
+            //     {
+            //         std::cout << "CONTENT TYPE 0" << std::endl;
+            //         buffer_recv[0] = 0;
+            //         rc = read(sd, buffer_recv, 1);
+
+            //         if (buffer_recv[0] == '\n')
+            //         {
+            //             request.push_back(line);
+            //             line.clear();
+            //         }
+            //         else
+            //             line += buffer_recv[0];
+
+            //         if (rc <= 0)
+            //         {
+            //             if (rc == 0)
+            //             {
+            //                 std::cout << "Connection closed...\n";
+            //                 return (-1);
+            //             }
+            //             else if (errno != EWOULDBLOCK)
+            //                 throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
+            //             break;
+            //         }
+            //     }
+            // }
             return (0);
         }
         else
         {
             buffer_recv[0] = 0;
-            rc = recv(sd, buffer_recv, 1, MSG_DONTWAIT);
+            rc = read(sd, buffer_recv, 1);
+            std::cout << buffer_recv[0];
         }
 
         if (buffer_recv[0] == '\n')
@@ -268,6 +304,12 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
 
         if (rc <= 0)
         {
+            std::cout << "RC = " << rc << std::endl;
+            if (errno == EWOULDBLOCK)
+                std::cout << "EWOULDBLOCK = " << rc << std::endl;
+
+            std::cout << "ERROR OUT" << std::endl;
+            
             if (rc == 0)
             {
                 std::cout << "Connection closed...\n";
@@ -275,7 +317,13 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
             }
             else if (errno != EWOULDBLOCK)
                 throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
-            break;
+            if (errno != EWOULDBLOCK)
+                break;
+            exit(1);
+            // if (headers_ended != false)
+            //     break;
+            // else
+            //     headers_ended = true;
         }
     }
     return(0);
