@@ -25,6 +25,10 @@
 
 #define MAX_CONNECTION 9999
 
+#ifdef __APPLE__
+# define MSG_NOSIGNAL 0
+#endif
+
 class Socket
 {
 	protected:
