@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:24:51 by rchallie          #+#    #+#             */
-/*   Updated: 2020/10/28 16:43:12 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/05 18:31:40 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "SocketManager.hpp"
 #include "HeadersBlock.hpp"
 #include <unistd.h>
+#include <string>
 
 class Server
 {
@@ -24,7 +25,7 @@ class Server
 
         int         waitConnection(fd_set *working_set, int max_sd);
         int         acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManager<SubSocket> &sub_sm);
-        int         receiveConnection(int sd, char *buffer, int buffer_size);
+        int         receiveConnection(int sd, std::vector<std::string>& request);
         int         closeConnection(int sd, int max_sd, fd_set *master_set);
         std::string getServerName(const HeadersBlock& hb);
 

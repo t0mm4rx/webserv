@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/04 00:04:13 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/05 17:01:19 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,6 +198,8 @@ int    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
 
         size_t posin;
 
+        std::cout << "CHECKED = " << lines[i] << std::endl;
+
         // Empty
         if (lines[i] == "\r" || lines[i].length() == 0)
             return (i);
@@ -227,21 +229,22 @@ int    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
     return (i);
 }
 
-HeadersBlock::HeadersBlock(const std::string & block, const std::string & client_ip)
+HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const std::string & client_ip)
 :
     _is_request(false),
     _client_ip(client_ip),
-    _content(),
-	_raw_request(block)
+    _content()
 {
-    std::vector<std::string> lines;
 
+    for (size_t i = 0; i < block_lines.size(); i++)
+        _raw_request += block_lines[i] + "\n";
+    
     std::cout << "RAW = [ \n" << _raw_request << "\n]\n"; 
 
-    this->getLines(block, &lines);
+    // this->getLines(block, &lines);
 
-    size_t pos = lines[0].find(" ");
-    std::string first_word = lines[0].substr(0, lines[0].find(" "));
+    size_t pos = block_lines[0].find(" ");
+    std::string first_word = block_lines[0].substr(0, block_lines[0].find(" "));
 
     try
     {
@@ -255,24 +258,24 @@ HeadersBlock::HeadersBlock(const std::string & block, const std::string & client
             {
                 if (first_word == methods[i])
                 {
-                    this->getRequestLine(lines);
+                    this->getRequestLine(block_lines);
                     break;
                 }
             }
             if (methods[i] == NULL)
-                this->getStatusLine(lines);
+                this->getStatusLine(block_lines);
         }
-        size_t end_headers = this->getHeaderFileds(lines);
+        size_t end_headers = this->getHeaderFileds(block_lines);
         while (42)
         {
-            if (end_headers < lines.size() && lines[end_headers] == "\r")
+            if (end_headers < block_lines.size() && block_lines[end_headers] == "\r")
                 end_headers++;
             else
                 break;
         }
 
-        for (size_t i = end_headers; i < lines.size(); i++)
-            this->pushContent(lines[i] + ((i != lines.size() -1) ? "\n" : ""));
+        for (size_t i = end_headers; i < block_lines.size(); i++)
+            this->pushContent(block_lines[i] + ((i != block_lines.size() -1) ? "\n" : ""));
         std::cout << "===========\n[" << this->_content << "]\n=============" << std::endl;
     }
     catch (const std::exception& e)
