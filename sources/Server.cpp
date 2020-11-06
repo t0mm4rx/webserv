@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/06 16:45:21 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/06 17:14:04 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,35 +235,6 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                     }
                 }
             }
-            // else if (content_type == 0)
-            // {
-            //     while (42)
-            //     {
-            //         std::cout << "CONTENT TYPE 0" << std::endl;
-            //         buffer_recv[0] = 0;
-            //         rc = read(sd, buffer_recv, 1);
-
-            //         if (buffer_recv[0] == '\n')
-            //         {
-            //             request.push_back(line);
-            //             line.clear();
-            //         }
-            //         else
-            //             line += buffer_recv[0];
-
-            //         if (rc <= 0)
-            //         {
-            //             if (rc == 0)
-            //             {
-            //                 std::cout << "Connection closed...\n";
-            //                 return (-1);
-            //             }
-            //             else if (errno != EWOULDBLOCK)
-            //                 throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
-            //             break;
-            //         }
-            //     }
-            // }
             return (0);
         }
         else
