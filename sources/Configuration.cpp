@@ -281,7 +281,7 @@ Configuration::server Configuration::_defaultServer(void)
 
 	s.port = 80;
 	s.host = "127.0.0.1";
-	s.root = "/www";
+	s.root = "";
 	return (s);
 }
 
@@ -294,11 +294,11 @@ Configuration::location Configuration::_defaultLocation(void)
 	location l;
 
 	l.name = "/";
-	l.root = "/www";
+	l.root = "";
 	l.autoindex = false;
 	l.cgi_path = "";
 	l.upload_enable = false;
-	l.upload_path = "/www/uploads";
+	l.upload_path = "";
 	l.client_max_body_size = 1048576;
 	return (l);
 }
@@ -316,6 +316,8 @@ void Configuration::_completeConfig(void)
 		{
 			if (_servers[i].locations[j].methods.size() == 0)
 				_servers[i].locations[j].methods.push_back("GET");
+			if (_servers[i].locations[j].root.size() == 0)
+				_servers[i].locations[j].root = _servers[i].root;
 		}
 	}
 }

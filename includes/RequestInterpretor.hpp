@@ -24,6 +24,7 @@ class RequestInterpretor
 		std::string _get(std::string ressource_path, std::map<std::string, std::string> headers, bool send_body=true);
 		std::string _head(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _put(std::string ressource_path, std::map<std::string, std::string> headers);
+		std::string _delete(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _trace(std::map<std::string, std::string> headers);
 		std::string _options(std::map<std::string, std::string> headers);
 		std::string _wrongMethod(void);

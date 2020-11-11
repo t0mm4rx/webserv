@@ -95,6 +95,8 @@ std::string RequestInterpretor::getResponse(void)
 		return _get(ressource_path, headers);
 	else if (method == "PUT")
 		return (_put(ressource_path, headers));
+	else if (method == "DELETE")
+		return (_delete(ressource_path, headers));
 	return ("");
 }
 
@@ -191,6 +193,24 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 		throwError(ex);
 	}
 	return (_generateResponse(rtn, headers, ""));
+}
+
+/**
+ * 	Performs a DELETE request.
+ *	@param ressource_path the path of the ressource to GET on the disk
+ * 	@return the string representation of the HTTP response
+ */
+std::string RequestInterpretor::_delete(std::string ressource_path, std::map<std::string, std::string> headers)
+{
+	int type;
+
+	type = pathType(ressource_path, NULL);
+	if (type == 1)
+	{
+		unlink(ressource_path.c_str());
+		return (_generateResponse(200, headers, ""));
+	}
+	return (_generateResponse(404, headers, _getErrorHTMLPage(404)));
 }
 
 /**

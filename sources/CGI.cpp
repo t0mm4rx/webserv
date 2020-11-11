@@ -182,7 +182,8 @@ std::map<std::string, std::string> CGI::_getParams(void)
 	args["REDIRECT_STATUS"] = "200";
 	args["REMOTE_ADDR"] = _request.getClientIP();
 	args["SCRIPT_NAME"] = _location.name + ((_location.name[_location.name.length() - 1] == '/') ? "" : "/") + replace(_ressource_path, _location.root, "");
-	args["PATH_INFO"] = "";
+	// args["PATH_INFO"] = _ressource_path;
+	args["PATH_INFO"] = _removeQueryArgs(_request.getRequestLine()._request_target);
 	args["SCRIPT_FILENAME"] = _ressource_path;
 	args["SERVER_NAME"] = _conf.host;
 	args["SERVER_PORT"] = uIntegerToString(_conf.port);
