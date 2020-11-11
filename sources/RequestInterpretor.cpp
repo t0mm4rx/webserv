@@ -143,6 +143,7 @@ std::string RequestInterpretor::_head(std::string ressource_path, std::map<std::
  */
 std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::string, std::string> headers)
 {
+	(void)ressource_path;
 	struct stat   buffer;
 	int fd = -1;
 	int rtn = 0;
@@ -150,9 +151,10 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 	std::cout << "PUT TREAT" << std::endl;
 	try
 	{
-		if ((stat(ressource_path.c_str(), &buffer) == 0))
+		std::cout << _location.upload_path + _header_block.getRequestLine()._request_target << std::endl;
+		if ((stat((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), &buffer) == 0))
 		{
-			if ((fd = open(ressource_path.c_str(), O_WRONLY | O_TRUNC, 0644)) == -1)
+			if ((fd = open((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_TRUNC, 0644)) == -1)
 				throw(throwMessageErrno("Create file on put"));
 			std::cout << "TO PUT = " << _header_block.getContent().c_str() << std::endl;
 			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
@@ -161,10 +163,11 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 		}
 		else
 		{
+			std::cout << "TO PUT Create = " << _header_block.getContent().c_str() << std::endl;
 			if (_header_block.getRequestLine()._request_target.find_last_of('/') != std::string::npos
 				&& _header_block.getRequestLine()._request_target.find_last_of('/') != _header_block.getRequestLine()._request_target.find_first_of('/'))
 			{
-				std::string dir = ressource_path;
+				std::string dir = _location.upload_path + _header_block.getRequestLine()._request_target;
 				std::cout << "DIR = " << dir << std::endl;
 				dir = dir.substr(0, dir.find_last_of('/'));
 				std::cout << "DIR = " << dir << std::endl;
@@ -175,9 +178,8 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 					if (errno != ENOENT || mkdir(dir.c_str(), 0777) == -1)
 						throw(throwMessageErrno("Create directory on put"));
 			}
-			if ((fd = open(ressource_path.c_str(), O_WRONLY | O_APPEND | O_CREAT, 0644)) == -1)
+			if ((fd = open((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_APPEND | O_CREAT, 0644)) == -1)
 				throw(throwMessageErrno("Create file on put"));
-			for (size_t i = 0 ; i < _header_block.getContent().length(); i++)
 			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
 			close(fd);
 			rtn = 201;
