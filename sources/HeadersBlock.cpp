@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/06 17:38:46 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/11 17:22:50 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,10 +236,13 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
     _content()
 {
 
+    // if (block_lines.size() < 2 && block_lines[0].length() == 0)
+    //     throw(throwMessage("EMPTY"));
+
     for (size_t i = 0; i < block_lines.size(); i++)
         _raw_request += block_lines[i] + "\n";
     
-    std::cout << "RAW = [" << _raw_request << "]" << std::endl; 
+    // std::cout << "RAW = [" << _raw_request << "]" << std::endl; 
 
     // this->getLines(block, &lines);
 
@@ -280,8 +283,8 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
         }
 
         for (size_t i = end_headers; i < block_lines.size(); i++)
-            this->pushContent(block_lines[i] + ((i != block_lines.size() -1) ? "\n" : ""));
-        std::cout << "===========\n[" << this->_content << "]\n=============" << std::endl;
+            this->pushContent(block_lines[i] + ((i != block_lines.size() - 1) ? "\n" : ""));
+        // std::cout << "===========\n[" << this->_content << "]\n=============" << std::endl;
     }
     catch (const std::exception& e)
     {

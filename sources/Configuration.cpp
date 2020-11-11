@@ -295,6 +295,7 @@ Configuration::location Configuration::_defaultLocation(void)
 
 	l.name = "/";
 	l.root = "";
+	l.index = "";
 	l.autoindex = false;
 	l.cgi_path = "";
 	l.upload_enable = false;

@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/06 17:38:38 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/11 17:38:13 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,8 +122,8 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
     int             content_type = 0; /* 0 = No, 1 = Normal, 2 chunked */
     int             content_len = 0;
 
-    std::cout << "           \n";
-    std::cout << "BUFFER = " << std::endl;
+    // std::cout << "           \n";
+    // std::cout << "BUFFER = " << std::endl;
     while (42)
     {
         bzero(buffer_recv, 1);
@@ -135,12 +135,10 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                 for (int i = 0; i < content_len; i++)
                 {
                     buffer_recv[0] = 0;
-                    std::cout << "BEGIN CONTENT 1\n";
                     rc = read(sd, buffer_recv, 1);
-                    std::cout << "BEGIN CONTENT 2\n";
                     if (buffer_recv[0] == '\r')
                         i--;
-                    std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
+                    // std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
                     if (buffer_recv[0] == '\n' || i + 1 == content_len)
                     {
                         if (i + 1 == content_len)
@@ -209,7 +207,7 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                         rc = read(sd, buffer_recv, 1);
                         if (buffer_recv[0] == '\r')
                             i--;
-                        std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
+                        // std::cout << "[" << i << "] BUFFER = " << buffer_recv[0] << std::endl;
                         if (buffer_recv[0] == '\n' || i + 1 == chunk_size)
                         {
                             if (i + 1 == chunk_size)
@@ -241,7 +239,7 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
         {
             buffer_recv[0] = 0;
             rc = read(sd, buffer_recv, 1);
-            std::cout << buffer_recv[0];
+            // std::cout << buffer_recv[0];
         }
 
         if (buffer_recv[0] == '\n')

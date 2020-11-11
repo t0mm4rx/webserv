@@ -59,10 +59,13 @@ std::string RequestInterpretor::getResponse(void)
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
 	ressource_path += _ressource;
+	std::cout << "ressource path: " + ressource_path << std::endl;
 	if (pathType(ressource_path, NULL) == 2)
 	{
-		if (pathType(ressource_path + _location.index, NULL) == 1)
-			ressource_path = ressource_path + _location.index;
+		std::cout << "ressource path: " + ressource_path + ((ressource_path[ressource_path.length() - 1] == '/') ? "" : "/") + _location.index << std::endl;
+		// if (pathType(ressource_path + ((ressource_path[ressource_path.length() - 1] == '/') ? "" : "/") + _location.index, NULL) == 1)
+		if (_location.index.length() > 0)
+			ressource_path = ressource_path + ((ressource_path[ressource_path.length() - 1] == '/') ? "" : "/") + _location.index;
 		else
 		{
 			if (_location.autoindex)
@@ -73,9 +76,9 @@ std::string RequestInterpretor::getResponse(void)
 	}
 	if (pathType(ressource_path, NULL) == 0 && method != "PUT")
 		return (_generateResponse(404, headers, method != "HEAD" ? _getErrorHTMLPage(404) : ""));
-	DEBUG("ressource path: " + ressource_path);
 	if (_shouldCallCGI(ressource_path))
 	{
+		std::cout << "SHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLD\n";
 		DEBUG("call CGI for this request");
 		try
 		{
@@ -157,7 +160,7 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 		if ((stat((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), &buffer) == 0))
 		{
 			if ((fd = open((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_TRUNC, 0644)) == -1)
-				throw(throwMessageErrno("Create file on put"));
+				throw(throwMessageErrno("TO CHANGE"));
 			std::cout << "TO PUT = " << _header_block.getContent().c_str() << std::endl;
 			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
 			close(fd);
@@ -165,11 +168,11 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 		}
 		else
 		{
-			std::cout << "TO PUT Create = " << _header_block.getContent().c_str() << std::endl;
+			// std::cout << "TO PUT Create = " << _header_block.getContent().c_str() << std::endl;
 			if (_header_block.getRequestLine()._request_target.find_last_of('/') != std::string::npos
 				&& _header_block.getRequestLine()._request_target.find_last_of('/') != _header_block.getRequestLine()._request_target.find_first_of('/'))
 			{
-				std::string dir = _location.upload_path + _header_block.getRequestLine()._request_target;
+				std::string dir = _location.root + _location.upload_path + _header_block.getRequestLine()._request_target;
 				std::cout << "DIR = " << dir << std::endl;
 				dir = dir.substr(0, dir.find_last_of('/'));
 				std::cout << "DIR = " << dir << std::endl;
@@ -178,9 +181,12 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 					closedir(dir_pointer);
 				else
 					if (errno != ENOENT || mkdir(dir.c_str(), 0777) == -1)
+					{
+						rtn = 500;
 						throw(throwMessageErrno("Create directory on put"));
+					}
 			}
-			if ((fd = open((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_APPEND | O_CREAT, 0644)) == -1)
+			if ((fd = open((_location.root + _location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_APPEND | O_CREAT, 0644)) == -1)
 				throw(throwMessageErrno("Create file on put"));
 			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
 			close(fd);
@@ -604,20 +610,27 @@ bool RequestInterpretor::_shouldCallCGI(std::string ressource_path)
 	size_t i;
 	std::string ext;
 
+
 	if (_location.cgi_path.size() == 0)
 		return (false);
-	i = 0;
-	while (ressource_path[i] && ressource_path[i] != '.')
-		++i;
+	i = ressource_path.size() - 1;
+	while (i > 0 && ressource_path[i] != '.')
+		--i;
+	std::cout << "1\n";
 	if (i >= ressource_path.size())
 		return (false);
+	std::cout << "2\n";
 	ext = std::string(ressource_path, i + 1, ressource_path.size() - i);
+	std::cout << "3\n";
 	for (size_t j = 0; j < _location.cgi_extension.size(); ++j)
 	{
-		DEBUG("EXT = " << ext)
+		std::cout << "A\n";
+		std::cout << "EXT = " << ext << std::endl;
 		if (_location.cgi_extension[j] == ext)
 			return (true);
+		std::cout << "B\n";
 	}
+	std::cout << "4\n";
 	return (false);
 }
 
@@ -631,9 +644,11 @@ std::string RequestInterpretor::_addCGIHeaders(std::string response)
 	std::string res;
 	size_t size;
 
+	std::cout << "response " << response.size() << std::endl;
 	size = response.size() - response.find("\n\r") - 3;
 	res = response;
 	res = "Content-Length: " + uIntegerToString(size) + "\n" + res;
+	std::cout << "Content-length = " << uIntegerToString(size) << std::endl;
 	res = "Date: " + _getDateHeader() + "\n" + res;
 	if (_getCGIStatus(response).size() > 0)
 		res = "HTTP/1.1 " + _getCGIStatus(response) + "\n" + res;
