@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/06 17:29:14 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/11 17:30:09 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,7 @@ int main(int argc, char **argv, char **env)
 int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration::server server_conf)
 {
 	std::string response = RequestInterpretor(header_block, server_conf).getResponse();
+    // std::cout << "SEND = [\n" << response << "]\n" << std::endl;
     std::cout << "SEND" << std::endl;
     int rc = 0;
     if (FD_ISSET(sd, &working_set))
