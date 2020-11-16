@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/11 17:22:50 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/16 16:47:58 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,8 @@ int    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
 {
     size_t i = 1;
 
-    for (i = 1; i < lines.size(); i++)
+    size_t lines_size = lines.size();
+    for (i = 1; i < lines_size; i++)
     {
         struct header_field field;
 
@@ -283,7 +284,7 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
         }
 
         for (size_t i = end_headers; i < block_lines.size(); i++)
-            this->pushContent(block_lines[i] + ((i != block_lines.size() - 1) ? "\n" : ""));
+            this->pushContent(block_lines[i]);
         // std::cout << "===========\n[" << this->_content << "]\n=============" << std::endl;
     }
     catch (const std::exception& e)
@@ -392,6 +393,5 @@ std::string HeadersBlock::getClientIP(void) const
  */
 std::string HeadersBlock::getPlainRequest(void) const
 {
-	std::cout << "MIP" << _raw_request << std::endl;
 	return (_raw_request);
 }

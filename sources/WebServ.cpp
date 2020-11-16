@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/11 17:30:09 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/12 15:23:12 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,14 @@ int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration:
 {
 	std::string response = RequestInterpretor(header_block, server_conf).getResponse();
     // std::cout << "SEND = [\n" << response << "]\n" << std::endl;
+    // std::string headers = "";
+	// if (response.find("\r\n\r\n") != std::string::npos)
+	// 	headers = response.substr(0, response.find("\r\n\r\n"));
+
+    std::cout << "HEADER = [\n";
+    for (int i = 0; i < 100; i++)
+        std::cout << response[i];
+    std::cout << "] " << std::endl;
     std::cout << "SEND" << std::endl;
     int rc = 0;
     if (FD_ISSET(sd, &working_set))
