@@ -705,9 +705,11 @@ std::string RequestInterpretor::_addCGIHeaders(std::string response)
 	std::string res;
 	size_t size;
 
-	std::string headers = "";
+	std::string headers = response;
 	if (response.find("\r\n\r\n") != std::string::npos)
 		headers = response.substr(0, response.find("\r\n\r\n"));
+
+	std::cout << "Headers: " << headers << std::endl;
 	
 	std::cout << "response " << response.size() << std::endl;
 	std::cout << "Occurence = \\n" << std::count(headers.begin(), headers.end(), '\n') << std::endl;
@@ -723,7 +725,7 @@ std::string RequestInterpretor::_addCGIHeaders(std::string response)
 				header_char_count++;
 	}
 
-	size = response.size() - std::count(headers.begin(), headers.end(), '\n') - std::count(headers.begin(), headers.end(), '\r') - header_char_count;
+	size = response.size() - std::count(response.begin(), response.end(), '\n') - std::count(response.begin(), response.end(), '\r') - header_char_count;
 	res = response;
 	res = "Content-Length: " + uIntegerToString(size) + "\r\n" + res;
 	std::cout << "Content-length = " << uIntegerToString(size) << std::endl;
