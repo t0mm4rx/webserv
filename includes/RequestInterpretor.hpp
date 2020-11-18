@@ -6,6 +6,7 @@
 # include <map>
 # include <dirent.h>
 # include <time.h>
+# include <algorithm>
 # include <sys/time.h>
 # include <stdio.h>
 # include "Configuration.hpp"
@@ -23,6 +24,7 @@ class RequestInterpretor
 		Configuration::location _location;
 		std::string _get(std::string ressource_path, std::map<std::string, std::string> headers, bool send_body=true);
 		std::string _head(std::string ressource_path, std::map<std::string, std::string> headers);
+		std::string _post(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _put(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _delete(std::string ressource_path, std::map<std::string, std::string> headers);
 		std::string _trace(std::map<std::string, std::string> headers);

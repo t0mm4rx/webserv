@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/11 17:38:13 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/16 17:22:12 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,10 +165,11 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
             }
             else if (content_type == 2)
             {
+                int tot_chunk_size = 0;
                 while (42)
                 {
                     std::cout << "PLOP ! \n";
-                    size_t chunk_size = 0;
+                    int chunk_size = 0;
                     /* CONTENT SIZE OF CHUNK */
                     while (42)
                     {
@@ -177,12 +178,19 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                         if (buffer_recv[0] == '\n')
                         {
                             std::cout << "LINE = " << line << std::endl;
+                            if (line == "\r")
+                            {
+                                std::cout << "EMPTY" << std::endl;
+                                line.clear();
+                                chunk_size = -1;
+                                break;
+                            }
                             chunk_size = std::stoi(line.c_str(), 0, 16);
                             std::cout << "Chunk Size = " << chunk_size << std::endl;
                             line.clear();
                             break;
                         }
-                        else if (buffer_recv[0] != '\r')
+                        else 
                             line += buffer_recv[0];
 
                         if (rc <= 0)
@@ -201,7 +209,7 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                     if (chunk_size == 0)
                         break;
                     /* CONTENT OF CHUNK */
-                    for (size_t i = 0; i < chunk_size + 2; i++)
+                    /*for (size_t i = 0; i < chunk_size + 2; i++)
                     {
                         buffer_recv[0] = 0;
                         rc = read(sd, buffer_recv, 1);
@@ -230,8 +238,26 @@ int Server::receiveConnection(int sd, std::vector<std::string>& request)
                                 throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
                             break;
                         }
+                    }*/
+                    if (chunk_size > 0)
+                    {
+                        tot_chunk_size += chunk_size;
+                        while (chunk_size != 0)
+                        {
+                            std::cout << "CHUNCK READ = " << chunk_size << "\n";
+                            char chunk_buffer_recv[chunk_size + 1];
+                            bzero(chunk_buffer_recv, chunk_size + 1);
+                            rc = read(sd, chunk_buffer_recv, chunk_size);
+                            chunk_size -= rc;
+                            std::cout << "RC = " << rc  << " | first = " << chunk_buffer_recv[0] << std::endl;
+                            // std::cout << "FROM READ = " << chunk_buffer_recv << std::endl;
+                            line = std::string(chunk_buffer_recv);
+                            request.push_back(line);
+                            line.clear();
+                        }
                     }
                 }
+                std::cout << "TOT chunk size = " << tot_chunk_size << std::endl;
             }
             return (0);
         }
@@ -419,6 +445,17 @@ void Server::loop()
                                 std::string server_name = this->getServerName(test);
                                 Socket last = this->_sm.getBySDandHost(client_socket.getParent().getSocketDescriptor(), server_name);
                                 
+                                // std::cout << "RECEIVED = [\n";
+                                size_t len = test.getPlainRequest().length();
+                                // for (size_t i = 0; i < 200 && i < len; i++)
+                                //     std::cout << test.getPlainRequest()[i];
+                                // std::cout << "] " << std::endl;
+		                        std::cout << "                                CONTENT LENGHT = " << test.getContent().length() << std::endl;
+
+
+                                if (test.getPlainRequest() == "\r\n" || len < 9)
+                                    throw(throwMessage("Empty request"));
+
                                 // int content_length = -1;
                                 // for (size_t i = 0; i < test.getHeaderFields().size(); i++)
                                 // {
