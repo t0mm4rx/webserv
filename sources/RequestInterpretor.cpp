@@ -59,11 +59,10 @@ std::string RequestInterpretor::getResponse(void)
 	if (ressource_path[ressource_path.size() - 1] == '/')
 		ressource_path = std::string(ressource_path, 0, ressource_path.size() - 1);
 	ressource_path += _ressource;
-	std::cout << "ressource path: " + ressource_path << std::endl;
+	DEBUG("ressource path: " + ressource_path);
 	if (pathType(ressource_path, NULL) == 2)
 	{
-		std::cout << "ressource path: " + ressource_path + ((ressource_path[ressource_path.length() - 1] == '/') ? "" : "/") + _location.index << std::endl;
-		// if (pathType(ressource_path + ((ressource_path[ressource_path.length() - 1] == '/') ? "" : "/") + _location.index, NULL) == 1)
+		DEBUG("ressource path: " + ressource_path + ((ressource_path[ressource_path.length() - 1] == '/') ? "" : "/") + _location.index);
 		if (_location.index.length() > 0)
 			ressource_path = ressource_path + ((ressource_path[ressource_path.length() - 1] == '/') ? "" : "/") + _location.index;
 		else
@@ -78,7 +77,6 @@ std::string RequestInterpretor::getResponse(void)
 		return (_generateResponse(404, headers, method != "HEAD" ? _getErrorHTMLPage(404) : ""));
 	if (_shouldCallCGI(ressource_path))
 	{
-		std::cout << "SHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOLD\n";
 		DEBUG("call CGI for this request");
 		try
 		{
@@ -86,7 +84,7 @@ std::string RequestInterpretor::getResponse(void)
 		}
 		catch (const std::exception &e)
 		{
-			std::cout << e.what() << std::endl;
+			std::cerr << e.what() << std::endl;
 			return (_generateResponse(500, headers, _getErrorHTMLPage(500)));
 		}
 	}
@@ -153,15 +151,13 @@ std::string RequestInterpretor::_post(std::string ressource_path, std::map<std::
 	int fd = -1;
 	int rtn = 0;
 
-	std::cout << "POST TREAT" << std::endl;
 	try
 	{
-		std::cout << _location.upload_path + _header_block.getRequestLine()._request_target << std::endl;
+		DEBUG(_location.upload_path + _header_block.getRequestLine()._request_target);
 		if ((stat((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), &buffer) == 0))
 		{
 			if ((fd = open((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_TRUNC, 0644)) == -1)
 				throw(throwMessageErrno("TO CHANGE"));
-			// std::cout << "TO PUT = " << _header_block.getContent().c_str() << std::endl;
 			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
 			close(fd);
 			rtn = 200;
@@ -169,14 +165,13 @@ std::string RequestInterpretor::_post(std::string ressource_path, std::map<std::
 		}
 		else
 		{
-			// std::cout << "TO PUT Create = " << _header_block.getContent().c_str() << std::endl;
 			if (_header_block.getRequestLine()._request_target.find_last_of('/') != std::string::npos
 				&& _header_block.getRequestLine()._request_target.find_last_of('/') != _header_block.getRequestLine()._request_target.find_first_of('/'))
 			{
 				std::string dir = _location.root + _location.upload_path + _header_block.getRequestLine()._request_target;
-				std::cout << "DIR = " << dir << std::endl;
+				DEBUG("DIR = " << dir);
 				dir = dir.substr(0, dir.find_last_of('/'));
-				std::cout << "DIR = " << dir << std::endl;
+				DEBUG("DIR = " << dir);
 				DIR* dir_pointer = opendir(dir.c_str());
 				if (dir_pointer)
 					closedir(dir_pointer);
@@ -214,29 +209,26 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 	int fd = -1;
 	int rtn = 0;
 
-	std::cout << "PUT TREAT" << std::endl;
 	try
 	{
-		std::cout << _location.upload_path + _header_block.getRequestLine()._request_target << std::endl;
+		DEBUG(_location.upload_path + _header_block.getRequestLine()._request_target);
 		if ((stat((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), &buffer) == 0))
 		{
 			if ((fd = open((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_TRUNC, 0644)) == -1)
 				throw(throwMessageErrno("TO CHANGE"));
-			// std::cout << "TO PUT = " << _header_block.getContent().c_str() << std::endl;
 			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
 			close(fd);
 			rtn = 204;
 		}
 		else
 		{
-			// std::cout << "TO PUT Create = " << _header_block.getContent().c_str() << std::endl;
 			if (_header_block.getRequestLine()._request_target.find_last_of('/') != std::string::npos
 				&& _header_block.getRequestLine()._request_target.find_last_of('/') != _header_block.getRequestLine()._request_target.find_first_of('/'))
 			{
 				std::string dir = _location.root + _location.upload_path + _header_block.getRequestLine()._request_target;
-				std::cout << "DIR = " << dir << std::endl;
+				DEBUG("DIR = " << dir);
 				dir = dir.substr(0, dir.find_last_of('/'));
-				std::cout << "DIR = " << dir << std::endl;
+				DEBUG("DIR = " << dir);
 				DIR* dir_pointer = opendir(dir.c_str());
 				if (dir_pointer)
 					closedir(dir_pointer);
@@ -677,21 +669,14 @@ bool RequestInterpretor::_shouldCallCGI(std::string ressource_path)
 	i = ressource_path.size() - 1;
 	while (i > 0 && ressource_path[i] != '.')
 		--i;
-	std::cout << "1\n";
 	if (i >= ressource_path.size())
 		return (false);
-	std::cout << "2\n";
 	ext = std::string(ressource_path, i + 1, ressource_path.size() - i);
-	std::cout << "3\n";
 	for (size_t j = 0; j < _location.cgi_extension.size(); ++j)
 	{
-		std::cout << "A\n";
-		std::cout << "EXT = " << ext << std::endl;
 		if (_location.cgi_extension[j] == ext)
 			return (true);
-		std::cout << "B\n";
 	}
-	std::cout << "4\n";
 	return (false);
 }
 
@@ -704,31 +689,20 @@ std::string RequestInterpretor::_addCGIHeaders(std::string response)
 {
 	std::string res;
 	size_t size;
+	int header_char_count = 0;
 
 	std::string headers = response;
 	if (response.find("\r\n\r\n") != std::string::npos)
 		headers = response.substr(0, response.find("\r\n\r\n"));
-
-	std::cout << "Headers: " << headers << std::endl;
-	
-	std::cout << "response " << response.size() << std::endl;
-	std::cout << "Occurence = \\n" << std::count(headers.begin(), headers.end(), '\n') << std::endl;
-	std::cout << "Occurence = \\r" << std::count(headers.begin(), headers.end(), '\r') << std::endl;
-
-
-	int header_char_count = 0;
 	if (headers != "")
 	{
-		std::cout << "IN\n";
 		for (size_t i = 0; i < headers.length(); i++)
 			if (headers[i] != '\n' && headers[i] != '\r')
 				header_char_count++;
 	}
-
 	size = response.size() - std::count(response.begin(), response.end(), '\n') - std::count(response.begin(), response.end(), '\r') - header_char_count;
 	res = response;
 	res = "Content-Length: " + uIntegerToString(size) + "\r\n" + res;
-	std::cout << "Content-length = " << uIntegerToString(size) << std::endl;
 	res = "Date: " + _getDateHeader() + "\r\n" + res;
 	if (_getCGIStatus(response).size() > 0)
 		res = "HTTP/1.1 " + _getCGIStatus(response) + "\r\n" + res;

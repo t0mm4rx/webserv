@@ -14,9 +14,9 @@
 # define WEBSERVER_HPP
 
 #if DEBUG_ACTIVE == 1 
-    #define DEBUG(x) std::cout << x << std::endl;
+	#define DEBUG(x) std::cout << x << std::endl;
 #else
-    #define DEBUG(x)
+	#define DEBUG(x)
 #endif
 
 #include <errno.h>
@@ -28,33 +28,33 @@
 #include "HeadersBlock.hpp"
 
 class throwMessage : public std::exception {
-    private:
-        std::string _msg;
+	private:
+		std::string _msg;
 
-    public:
-        throwMessage (const std::string& msg) throw() : _msg(msg) {}
-        throwMessage (const throwMessage&) throw() {}
-        throwMessage& operator= (const throwMessage&) throw();
-        virtual ~throwMessage() throw() {}
-        virtual const char* what() const throw() { return (_msg.c_str()); }
+	public:
+		throwMessage (const std::string& msg) throw() : _msg(msg) {}
+		throwMessage (const throwMessage&) throw() {}
+		throwMessage& operator= (const throwMessage&) throw();
+		virtual ~throwMessage() throw() {}
+		virtual const char* what() const throw() { return (_msg.c_str()); }
 };
 
 class throwMessageErrno : public std::exception {
-    private:
-        std::string _msg;
+	private:
+		std::string _msg;
 
-    public:
-        throwMessageErrno (const std::string& msg) throw() 
-        {
-            std::stringstream ss;
-            ss << msg << " : " << strerror(errno);
-            this->_msg = ss.str();
-        }
+	public:
+		throwMessageErrno (const std::string& msg) throw() 
+		{
+			std::stringstream ss;
+			ss << msg << " : " << strerror(errno);
+			this->_msg = ss.str();
+		}
 
-        throwMessageErrno (const throwMessageErrno&) throw() {}
-        throwMessageErrno& operator= (const throwMessageErrno&) throw();
-        virtual ~throwMessageErrno() throw() {}
-        virtual const char* what() const throw() { return (_msg.c_str()); }
+		throwMessageErrno (const throwMessageErrno&) throw() {}
+		throwMessageErrno& operator= (const throwMessageErrno&) throw();
+		virtual ~throwMessageErrno() throw() {}
+		virtual const char* what() const throw() { return (_msg.c_str()); }
 };
 
 void throwError(const std::exception& ex);

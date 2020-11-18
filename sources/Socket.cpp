@@ -12,8 +12,6 @@
 
 #include "../includes/Socket.hpp"
 
-// PRIVATE 
-
 /**
  *  @brief Create the socket and give is socket descriptor.
  *  The socket is under IPV4 protocol (PF_INET / AF_INET)
@@ -74,7 +72,7 @@ void Socket::initAddress(int port)
 	DEBUG("Init Address...")
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY; 
-    this->_address.sin_port = htons( port ); 
+	this->_address.sin_port = htons( port ); 
 }
 
 /**
@@ -117,7 +115,6 @@ Socket::Socket(const struct Configuration::server& server)
 :
 	_server_config(server)
 {
-	// std::cout << "Server Name = [" << this->_server_config.names << "]" << std::endl;
 	try
 	{
 		this->createSocketDescriptor();

@@ -14,10 +14,10 @@
 
 void throwError(const std::exception& ex)
 {
-    std::cerr << "\033[1m\033[31mERROR \033[0m: " << ex.what() << '\n';
+	std::cerr << "\033[1m\033[31mERROR \033[0m: " << ex.what() << '\n';
 }
 
 void outError(const std::string& msg)
 {
-    std::cerr << "\033[1m\033[31mERROR \033[0m: " << msg << '\n';
+	std::cerr << "\033[1m\033[31mERROR \033[0m: " << msg << '\n';
 }

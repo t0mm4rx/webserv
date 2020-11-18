@@ -14,23 +14,27 @@
 
 SubSocket::SubSocket(Socket& parent, std::string client_ip, int sd)
 :
-    Socket(sd),
-    _parent_socket(parent),
-    _client_ip(client_ip)
+	Socket(sd),
+	_parent_socket(parent),
+	_client_ip(client_ip)
 {}
 
 SubSocket::SubSocket(const SubSocket& copy)
 :
-    Socket(copy._sd),
-    _parent_socket(copy._parent_socket),
-    _client_ip(copy._client_ip)
+	Socket(copy._sd),
+	_parent_socket(copy._parent_socket),
+	_client_ip(copy._client_ip)
 {}
 
 SubSocket::~SubSocket() {}
 SubSocket &SubSocket::operator=(const Socket& op) {(void)op; return (*this);}
 
 Socket &SubSocket::getParent()
-{ return (this->_parent_socket); }
+{
+	return (this->_parent_socket);
+}
 
 std::string SubSocket::getClientIp()
-{ return (this->_client_ip); }
+{
+	return (this->_client_ip);
+}

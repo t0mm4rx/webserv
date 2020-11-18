@@ -22,80 +22,61 @@ char **g_envp;
 
 int main(int argc, char **argv, char **env)
 {
+	char *path;
+
 	g_envp = env;
-    // char block[] = "GET / HTTP/12.1\r\nHost: 0.0.0.0:3650\r\nUser-Agent: insomnia/2020.4.1\r\nAccept: */*\r\n\r\n";
-    // char block[] = "HTTP/1.1 200 plop\nHost: localhost:5000\nUser-Agent: insomnia/2020.4.1\nAccept: */*\n\n";
-    // try
-    // {
-    //     HeadersBlock test(block);
-    // }
-    // catch (const std::exception& e)
-    // {
-    //     throwError(e);
-    // }
-    // exit(1);
-
-    char *path;
-
-    if (argc != 2)
-    {
-        outError("Please use : ./WebServ <path>");
-        return (1);
-    }
-    path = argv[1];
-    
-    DEBUG("")
-   
-
-    try
-    {
-        Configuration test = Configuration(path);
-		    test.print();
-        SocketManager<Socket> sm;
-        for (int i = 0; i < (int)test.getServers().size(); i++)
-        {
-            Socket *exist = NULL;
-            for (size_t j = 0; j < sm.getSockets().size(); j++)
-                if (sm.getSockets()[j]->getServerConfiguration().port == test.getServers()[i].port)
-                    exist = sm.getSockets()[j];
-            if (exist == NULL)
-                sm.registerSocket(new Socket(test.getServers()[i]));
-            else
-                sm.registerSocket(new Socket(exist->getSocketDescriptor(), test.getServers()[i]));
-        }
-        
-        Server server(sm);
-        
-        server.loop();
-    }
-    catch(const std::exception& e)
-    {
-        throwError(e);
-    }
-    return (0);
+	if (argc != 2)
+	{
+		outError("Please use : ./WebServ <path>");
+		return (1);
+	}
+	path = argv[1];
+	try
+	{
+		Configuration test = Configuration(path);
+		#if DEBUG_ACTIVE == 1
+		test.print();
+		#endif
+		SocketManager<Socket> sm;
+		for (int i = 0; i < (int)test.getServers().size(); i++)
+		{
+			Socket *exist = NULL;
+			for (size_t j = 0; j < sm.getSockets().size(); j++)
+				if (sm.getSockets()[j]->getServerConfiguration().port == test.getServers()[i].port)
+					exist = sm.getSockets()[j];
+			if (exist == NULL)
+				sm.registerSocket(new Socket(test.getServers()[i]));
+			else
+				sm.registerSocket(new Socket(exist->getSocketDescriptor(), test.getServers()[i]));
+		}
+		Server server(sm);
+		server.loop();
+	}
+	catch(const std::exception& e)
+	{
+		throwError(e);
+	}
+	return (0);
 }
 
 int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration::server server_conf)
 {
 	std::string response = RequestInterpretor(header_block, server_conf).getResponse();
-    // std::cout << "SEND = [\n" << response << "]\n" << std::endl;
-    // std::string headers = "";
-	// if (response.find("\r\n\r\n") != std::string::npos)
-	// 	headers = response.substr(0, response.find("\r\n\r\n"));
-
-    std::cout << "HEADER = [\n";
-    for (int i = 0; i < 100; i++)
-        std::cout << response[i];
-    std::cout << "] " << std::endl;
-    std::cout << "SEND" << std::endl;
-    int rc = 0;
-    if (FD_ISSET(sd, &working_set))
-        rc = write(sd, response.c_str(), response.size());
-    std::cout << "END SEND" << std::endl;
-    if (rc < 0)
-    {
-        DEBUG("  send() failed");
-        return (-1);
-    }
-    return (0);
+	#if DEBUG_ACTIVE == 1
+	std::cout << "HEADER = [\n";
+	for (int i = 0; i < 100; i++)
+		std::cout << response[i];
+	std::cout << "] " << std::endl;
+	#endif
+	DEBUG("SEND");
+	int rc = 0;
+	if (FD_ISSET(sd, &working_set))
+		rc = write(sd, response.c_str(), response.size());
+	DEBUG("END SEND");
+	if (rc < 0)
+	{
+		DEBUG("send() failed");
+		return (-1);
+	}
+	return (0);
 }

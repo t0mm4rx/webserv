@@ -17,18 +17,18 @@
 
 class SubSocket : public Socket
 {
-    private:
-        Socket      _parent_socket;
-        std::string _client_ip;
+	private:
+		Socket      _parent_socket;
+		std::string _client_ip;
 
-    public:
-        SubSocket(Socket& parent, std::string client_ip, int sd);
-        SubSocket(const SubSocket& copy);
-        ~SubSocket();
-        SubSocket &operator=(const Socket& op);
+	public:
+		SubSocket(Socket& parent, std::string client_ip, int sd);
+		SubSocket(const SubSocket& copy);
+		~SubSocket();
+		SubSocket &operator=(const Socket& op);
 
-        Socket &getParent();
-        std::string getClientIp();
+		Socket &getParent();
+		std::string getClientIp();
 };
 
 #endif

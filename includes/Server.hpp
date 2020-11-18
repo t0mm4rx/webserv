@@ -20,22 +20,22 @@
 
 class Server
 {
-    private:
-        SocketManager<Socket>   _sm;
+	private:
+		SocketManager<Socket>   _sm;
 
-        int         waitConnection(fd_set *working_set, int max_sd);
-        int         acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManager<SubSocket> &sub_sm);
-        int         receiveConnection(int sd, std::vector<std::string>& request);
-        int         closeConnection(int sd, int max_sd, fd_set *master_set);
-        std::string getServerName(const HeadersBlock& hb);
+		int         waitConnection(fd_set *working_set, int max_sd);
+		int         acceptConnection(int sd, int max_sd, fd_set *master_set, SocketManager<SubSocket> &sub_sm);
+		int         receiveConnection(int sd, std::vector<std::string>& request);
+		int         closeConnection(int sd, int max_sd, fd_set *master_set);
+		std::string getServerName(const HeadersBlock& hb);
 
-    public:
-        Server(SocketManager<Socket> sm);
-        Server(const Server& copy);
-        ~Server();
-        Server &operator=(const Server& op);
+	public:
+		Server(SocketManager<Socket> sm);
+		Server(const Server& copy);
+		~Server();
+		Server &operator=(const Server& op);
 
-        void loop();
+		void loop();
 };
 
 #endif
