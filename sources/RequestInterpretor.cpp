@@ -204,52 +204,46 @@ std::string RequestInterpretor::_post(std::string ressource_path, std::map<std::
  */
 std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::string, std::string> headers)
 {
-	(void)ressource_path;
-	struct stat   buffer;
 	int fd = -1;
 	int rtn = 0;
+	int type;
+	std::string path;
 
+	if (_location.upload_path.size() > 0)
+	{
+		std::string file = std::string(_header_block.getRequestLine()._request_target, _location.name.size());
+		path = _location.upload_path + "/" + file;
+	}
+	else
+		path = ressource_path;
+	DEBUG("PUT path: " + path);
+	type = pathType(path, NULL);
 	try
 	{
-		DEBUG(_location.upload_path + _header_block.getRequestLine()._request_target);
-		if ((stat((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), &buffer) == 0))
+		if (type == 0)
 		{
-			if ((fd = open((_location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_TRUNC, 0644)) == -1)
+			if ((fd = open(path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1)
 				throw(throwMessageErrno("TO CHANGE"));
+			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
+			close(fd);
+			rtn = 201;
+		}
+		else if (type == 1)
+		{
+			if ((fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
+				throw(throwMessageErrno("Create file on put"));
 			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
 			close(fd);
 			rtn = 204;
 		}
 		else
-		{
-			if (_header_block.getRequestLine()._request_target.find_last_of('/') != std::string::npos
-				&& _header_block.getRequestLine()._request_target.find_last_of('/') != _header_block.getRequestLine()._request_target.find_first_of('/'))
-			{
-				std::string dir = _location.root + _location.upload_path + _header_block.getRequestLine()._request_target;
-				DEBUG("DIR = " << dir);
-				dir = dir.substr(0, dir.find_last_of('/'));
-				DEBUG("DIR = " << dir);
-				DIR* dir_pointer = opendir(dir.c_str());
-				if (dir_pointer)
-					closedir(dir_pointer);
-				else
-					if (errno != ENOENT || mkdir(dir.c_str(), 0777) == -1)
-					{
-						rtn = 500;
-						throw(throwMessageErrno("Create directory on put"));
-					}
-			}
-			if ((fd = open((_location.root + _location.upload_path + _header_block.getRequestLine()._request_target).c_str(), O_WRONLY | O_APPEND | O_CREAT, 0644)) == -1)
-				throw(throwMessageErrno("Create file on put"));
-			write(fd, _header_block.getContent().c_str(), _header_block.getContent().length());
-			close(fd);
-			rtn = 201;
-		}
+			return (_generateResponse(409, headers, _getErrorHTMLPage(409)));
 		headers["Content-Location"] = _header_block.getRequestLine()._request_target;
 	}
 	catch (std::exception & ex)
 	{
 		throwError(ex);
+		return (_generateResponse(409, headers, _getErrorHTMLPage(409)));
 	}
 	return (_generateResponse(rtn, headers, ""));
 }
