@@ -2,3 +2,4 @@
 objects/
 WebServ
 __pycache__
+tests/www/tmp/*
