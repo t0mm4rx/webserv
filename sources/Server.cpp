@@ -43,7 +43,7 @@ int Server::waitConnection(fd_set *working_set, int max_sd)
 {
 	int socket_ready;
 
-	if ((socket_ready = select(max_sd + 1,working_set,
+	if ((socket_ready = select(max_sd + 1, working_set,
 		NULL, NULL, NULL)) < 0)
 		throw(throwMessageErrno("Wait connection"));
 	return (socket_ready);
@@ -393,11 +393,12 @@ void Server::loop()
 								std::string server_name = this->getServerName(test);
 								Socket last = this->_sm.getBySDandHost(client_socket.getParent().getSocketDescriptor(), server_name);
 								size_t len = test.getPlainRequest().length();
-								if (test.getPlainRequest() == "\r\n" || len < 9)
-									throw(throwMessage("Empty request"));
-								DEBUG("TREAT");
-								treat(i, working_set, test, last.getServerConfiguration());  //Temporary
-								DEBUG("END TREAT");
+								if (!(test.getPlainRequest() == "\r\n" || len < 9))
+									treat(i, working_set, test, last.getServerConfiguration());
+								// throw(throwMessage("Empty request"));
+								// DEBUG("TREAT");
+								  //Temporary
+								// DEBUG("END TREAT");
 							}
 							catch (const std::exception& e)
 							{
