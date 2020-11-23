@@ -6,12 +6,13 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:25:44 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/06 17:28:50 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/21 16:25:55 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
+
 
 #if DEBUG_ACTIVE == 1 
 	#define DEBUG(x) std::cout << x << std::endl;
@@ -26,6 +27,22 @@
 #include <sstream>
 #include "Configuration.hpp"
 #include "HeadersBlock.hpp"
+
+#include <sys/time.h>
+
+class Log
+{
+	public:
+		Log(std::string msg)
+		{
+			struct timeval current_time;
+			char time_buffer[100];
+			bzero(time_buffer, 100);
+			gettimeofday(&current_time, NULL);
+			strftime(time_buffer,100,"%F %R:%S", localtime(&current_time.tv_sec));
+			std::cout << "[" << time_buffer << "] : " << msg << std::endl;
+		}
+};
 
 class throwMessage : public std::exception {
 	private:

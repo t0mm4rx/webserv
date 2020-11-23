@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/16 16:47:58 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/23 17:19:10 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,14 +228,16 @@ int    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
 	return (i);
 }
 
-HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const std::string & client_ip)
+HeadersBlock::HeadersBlock(const std::string & request, const std::string & client_ip)
 :
 	_is_request(false),
 	_client_ip(client_ip),
-	_content()
+	_content(),
+	_raw_request(request)
 {
-	for (size_t i = 0; i < block_lines.size(); i++)
-		_raw_request += block_lines[i] + "\n";
+	std::vector<std::string> block_lines;
+	
+	getLines(request, &block_lines);
 	try
 	{
 		if (block_lines.size() < 1)
@@ -273,7 +275,8 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
 	catch (const std::exception& e)
 	{
 		throwError(e);
-		throw(throwMessage("Can't parse header.")); 
+		exit(1);
+		throw(throwMessage("Can't parse header."));
 	}
 }
 

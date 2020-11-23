@@ -377,3 +377,12 @@ int pathType(std::string path, time_t *file_date)
 	else
 		return (0);
 }
+
+std::string itoa(int nb)
+{
+	std::string s;
+	std::stringstream out;
+	out << nb;
+	s = out.str();
+	return (s);
+}
