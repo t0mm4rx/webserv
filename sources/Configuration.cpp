@@ -269,6 +269,21 @@ void Configuration::_validateConfig(void)
 				throw ParsingException(0, "The cgi path '" + _servers[i].locations[j].cgi_path + "' is not a valid file.");
 		}
 	}
+	for (size_t i = 0; i < _servers.size(); ++i)
+	{
+		for (size_t j = 0; j < _servers.size(); ++j)
+		{
+			if (i != j)
+			{
+				if (_servers[i].host == "127.0.0.1")
+					_servers[i].host = "localhost";
+				if (_servers[j].host == "127.0.0.1")
+					_servers[j].host = "localhost";
+				if (_servers[i].host == _servers[j].host && _servers[i].port == _servers[j].port)
+					throw ParsingException(0, "Two servers have the same host and port.");
+			}
+		}
+	}
 }
 
 /**
