@@ -49,6 +49,13 @@ def run(port: int) -> None:
 	run_test("GET /doidjo...", test_404, port)
 	run_test("GET /index/a/", test_autoindex, port)
 	run_test("PUT /post/c * 2", test_two_puts, port)
+	run_test("GET with different index", test_different_index, port)
+	run_test("HEAD /", test_head, port)
+	run_test("TRACE /", test_trace, port)
+	run_test("100 GET /", test_multiple_get, port)
+	run_test("PUT /post/test, DELETE /post/test", test_delete, port)
+	run_test("CONNECT /", test_connect, port)
+	# run_test("GET / on port 8080 and 8081", test_multiple_ports, port)
 
 if (__name__ == "__main__"):
 	if (len(sys.argv) != 2):
