@@ -6,16 +6,23 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/25 00:01:04 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 15:07:28 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Server.hpp"
 
+Server::Server()
+:
+	_sm(),
+	_sub_sm()
+{}
+
 //WIP
 Server::Server(SocketManager<Socket *> sm)
 :
-	_sm(sm)
+	_sm(sm),
+	_sub_sm()
 {}
 
 //WIP
@@ -28,7 +35,13 @@ Server::~Server()
 
 //WIP
 Server &Server::operator=(const Server& op)
-{(void)op; return (*this); }
+{
+	if (&op == this)
+		return (*this);
+	this->_sm = op._sm;
+	this->_sub_sm = op._sub_sm;
+	return (*this);
+}
 
 static std::string ft_inet_ntoa(struct in_addr in)
 {
@@ -251,7 +264,7 @@ void Server::loop()
 	fd_set  master_write_set;
 	
 	int     max_sd;
-	SocketManager<SubSocket *> sub_sm;
+	
 
 	master_rest_set = this->_sm.getSDSet();
 	FD_ZERO(&master_write_set);
@@ -271,18 +284,18 @@ void Server::loop()
 				int server_sd = this->_sm.getSockets()[server]->getSocketDescriptor();
 				if (FD_ISSET(server_sd, &read_set))
 				{
-					if (this->_sm.getSockets().size() + sub_sm.getSockets().size() < MAX_CONNECTION)
-						max_sd = this->acceptConnection(server_sd, max_sd, &master_rest_set, &master_write_set, sub_sm);
+					if (this->_sm.getSockets().size() + this->_sub_sm.getSockets().size() < MAX_CONNECTION)
+						max_sd = this->acceptConnection(server_sd, max_sd, &master_rest_set, &master_write_set, this->_sub_sm);
 					else
 						std::cout << "MAX CONNECTION" << std::endl; //rtn 503
 				}
 			}
 
 			/* Clients */
-			for (size_t client = 0; client < sub_sm.getSockets().size(); client++)
+			for (size_t client = 0; client < this->_sub_sm.getSockets().size(); client++)
 			{
 				int rtn;
-				SubSocket &client_socket = *sub_sm.getSockets()[client];
+				SubSocket &client_socket = *this->_sub_sm.getSockets()[client];
 				int	client_sd = client_socket.getSocketDescriptor();
 				bool client_treat = false;
 				
@@ -300,7 +313,8 @@ void Server::loop()
 						if (treat(client_sd, test, (*last).getServerConfiguration()) == -1)
 						{
 							max_sd = this->closeConnection(client_sd, max_sd, &master_rest_set, &master_write_set);
-							sub_sm.getSockets().erase(sub_sm.getSockets().begin() + client);
+							delete this->_sub_sm.getSockets()[client];
+							this->_sub_sm.getSockets().erase(this->_sub_sm.getSockets().begin() + client);
 							client--;
 							continue;
 						}
@@ -319,7 +333,8 @@ void Server::loop()
 					if ((rtn = this->receiveConnection(client_sd, client_socket.getRequest())) < 0)
 					{
 						max_sd = this->closeConnection(client_sd, max_sd, &master_rest_set, &master_write_set);
-						sub_sm.getSockets().erase(sub_sm.getSockets().begin() + client);
+						delete this->_sub_sm.getSockets()[client];
+						this->_sub_sm.getSockets().erase(this->_sub_sm.getSockets().begin() + client);
 						client--;
 					}
 					else if (rtn == 0)
@@ -332,5 +347,22 @@ void Server::loop()
 		{
 			throwError(e);
 		}
+	}
+}
+
+void Server::closeServer(void)
+{
+	for (size_t client = 0; client < this->_sub_sm.getSockets().size(); client++)
+	{
+		close(this->_sub_sm.getSockets()[client]->getSocketDescriptor());
+		Log("Client connection closed : " + itoa(this->_sub_sm.getSockets()[client]->getSocketDescriptor()));
+		delete this->_sub_sm.getSockets()[client];
+	}
+
+	for (size_t server = 0; server < this->_sm.getSockets().size(); server++)
+	{
+		close(this->_sm.getSockets()[server]->getSocketDescriptor());
+		Log("Server closed : " + itoa(this->_sm.getSockets()[server]->getSocketDescriptor()));
+		delete this->_sm.getSockets()[server];
 	}
 }
