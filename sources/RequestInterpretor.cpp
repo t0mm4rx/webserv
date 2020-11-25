@@ -46,7 +46,7 @@ std::string RequestInterpretor::getResponse(void)
 
 	headers["Content-Type"] = _getMIMEType("a.html");
 	if (_header_block.getContent().size() > _location.client_max_body_size)
-		return (_generateResponse(413, headers, _getErrorHTMLPage(413)));
+		return (_generateResponse(413, headers, method != "HEAD" ? _getErrorHTMLPage(413) : ""));
 	if (!_isMethodAllowed(method))
 		return (_wrongMethod());
 	if (method == "TRACE")
@@ -85,7 +85,7 @@ std::string RequestInterpretor::getResponse(void)
 		catch (const std::exception &e)
 		{
 			std::cerr << e.what() << std::endl;
-			return (_generateResponse(500, headers, _getErrorHTMLPage(500)));
+			return (_generateResponse(500, headers, method != "HEAD" ?_getErrorHTMLPage(500) : ""));
 		}
 	}
 	if (method == "GET")
@@ -320,7 +320,7 @@ std::string RequestInterpretor::_wrongMethod(void)
 			allowed += ", ";
 	}
 	headers["Allow"] = allowed;
-	return (_generateResponse(405, headers, _getErrorHTMLPage(405)));
+	return (_generateResponse(405, headers, _header_block.getRequestLine()._method != "HEAD" ?_getErrorHTMLPage(405) : ""));
 }
 
 /**

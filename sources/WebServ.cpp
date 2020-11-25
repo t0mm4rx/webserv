@@ -50,8 +50,9 @@ int main(int argc, char **argv, char **env)
 				sm.registerSocket(new Socket(test.getServers()[i]));
 			else
 				sm.registerSocket(new Socket(exist->getSocketDescriptor(), test.getServers()[i]));
-			Log("Server created on port " + itoa(test.getServers()[test.getServers().size() - 1].port)
-				+ " : " + itoa(sm.getSockets()[test.getServers().size() - 1]->getSocketDescriptor()));
+			std::cout << "AAA: " << sm.getSockets().size() << std::endl;
+			Log("Server created on port " + itoa(test.getServers()[i].port)
+				+ " : " + itoa(sm.getSockets()[i]->getSocketDescriptor()));
 		}
 		server = Server(sm);
 		signal(SIGINT, endServer);
