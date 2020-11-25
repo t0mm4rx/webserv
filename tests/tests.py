@@ -79,7 +79,7 @@ def test_multiple_ports(port: int) -> str:
 	if (req.text != "hello world"):
 		return "Bad content on first port."
 	req = requests.get(get_base_url(port + 1))
-	if (req.text != "second port"):
+	if (req.text != "second file"):
 		return "Bad content on second port."
 	return ""
 
