@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/25 16:15:44 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 16:21:20 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,24 +75,20 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *read_set, fd_set *write
 
 	DEBUG("Readable socket")
 
-	// do
-	// {
-		sockaddr_in client;
-		socklen_t size = sizeof(client);
-		if ((new_sd = accept(sd, (sockaddr *)&client, &size)) < 0)
-		{
-			if (errno != EWOULDBLOCK)
-				throw(throwMessageErrno("accept() failed"));
-			// break;
-		}
-		
-		Log("New client connection : " + itoa(new_sd));
-		sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), ft_inet_ntoa(client.sin_addr), new_sd));
-		FD_SET(new_sd, read_set);
-		FD_SET(new_sd, write_set);
-		if (new_sd > max_sd)
-			max_sd = new_sd;
-	// } while (new_sd != -1);
+	sockaddr_in client;
+	socklen_t size = sizeof(client);
+	if ((new_sd = accept(sd, (sockaddr *)&client, &size)) < 0)
+	{
+		if (errno != EWOULDBLOCK)
+			throw(throwMessageErrno("accept() failed"));
+	}
+	
+	Log("New client connection : " + itoa(new_sd));
+	sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), ft_inet_ntoa(client.sin_addr), new_sd));
+	FD_SET(new_sd, read_set);
+	FD_SET(new_sd, write_set);
+	if (new_sd > max_sd)
+		max_sd = new_sd;
 	
 	return (max_sd);
 }
