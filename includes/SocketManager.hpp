@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 22:45:21 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/25 14:54:21 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 16:02:41 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ class SocketManager
 					for (size_t j = 0; j < (*it)->getServerConfiguration().names.size(); j++)
 						if ((*it)->getServerConfiguration().names[j] == "default_server")
 							return (*it);
-			throw(throwMessage("SD & Host not found."));
+			return (this->getBySD(sd));
 		}
 
 		std::vector<T>  &getSockets(void)

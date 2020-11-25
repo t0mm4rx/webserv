@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/25 15:14:36 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 15:48:31 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ int main(int argc, char **argv, char **env)
 				sm.registerSocket(new Socket(test.getServers()[i]));
 			else
 				sm.registerSocket(new Socket(exist->getSocketDescriptor(), test.getServers()[i]));
-			std::cout << "AAA: " << sm.getSockets().size() << std::endl;
 			Log("Server created on port " + itoa(test.getServers()[i].port)
 				+ " : " + itoa(sm.getSockets()[i]->getSocketDescriptor()));
 		}
