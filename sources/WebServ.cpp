@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/12 15:23:12 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/24 16:46:48 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ char **g_envp;
 
 int main(int argc, char **argv, char **env)
 {
+	Log("Start Server.");
 	char *path;
 
 	g_envp = env;
@@ -37,7 +38,7 @@ int main(int argc, char **argv, char **env)
 		#if DEBUG_ACTIVE == 1
 		test.print();
 		#endif
-		SocketManager<Socket> sm;
+		SocketManager<Socket *> sm;
 		for (int i = 0; i < (int)test.getServers().size(); i++)
 		{
 			Socket *exist = NULL;
@@ -60,23 +61,16 @@ int main(int argc, char **argv, char **env)
 	return (0);
 }
 
-int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration::server server_conf)
+int treat(int sd, HeadersBlock &header_block, Configuration::server server_conf)
 {
 	std::string response = RequestInterpretor(header_block, server_conf).getResponse();
-	#if DEBUG_ACTIVE == 1
-	std::cout << "HEADER = [\n";
-	for (int i = 0; i < 100; i++)
-		std::cout << response[i];
-	std::cout << "] " << std::endl;
-	#endif
-	DEBUG("SEND");
-	int rc = 0;
-	if (FD_ISSET(sd, &working_set))
-		rc = write(sd, response.c_str(), response.size());
+
+	Log("Send response to : " + itoa(sd));
+	int	rc = write(sd, response.c_str(), response.size());
 	DEBUG("END SEND");
-	if (rc < 0)
+	if (rc <= 0)
 	{
-		DEBUG("send() failed");
+		Log("Error or connection close on : " + itoa(sd));
 		return (-1);
 	}
 	return (0);

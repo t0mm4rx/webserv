@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:50:31 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/16 16:47:58 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/24 18:57:18 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,17 +97,19 @@ static bool isValidToken(std::string token)
  *  @brief Split the block in a vector of line.
  * 
  *  @param msg the block to split.
- *  @param lines the vector.
+ *  @param lines the vector. Can be a reference in the futur.
  */
 void    HeadersBlock::getLines(std::string msg, std::vector<std::string> *lines)
 {
-	size_t pos = 0;
-	while ((pos = msg.find("\n")) != std::string::npos)
+	size_t start = 0;
+	size_t end = msg.find("\n");
+	while (end != std::string::npos)
 	{
-		(*lines).push_back(msg.substr(0, pos));
-		msg.erase(0, pos + 1);
+		(*lines).push_back(msg.substr(start, end - start));
+		start = end + 1;
+		end = msg.find("\n", start);
 	}
-	(*lines).push_back(msg.substr(0, pos));
+	(*lines).push_back(msg.substr(start, end - start));
 }
 
 /**
@@ -228,14 +230,16 @@ int    HeadersBlock::getHeaderFileds(std::vector<std::string> lines)
 	return (i);
 }
 
-HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const std::string & client_ip)
+HeadersBlock::HeadersBlock(const std::string & request, const std::string & client_ip, int content_type)
 :
 	_is_request(false),
 	_client_ip(client_ip),
-	_content()
+	_content(),
+	_raw_request(request)
 {
-	for (size_t i = 0; i < block_lines.size(); i++)
-		_raw_request += block_lines[i] + "\n";
+	std::vector<std::string> block_lines;
+	
+	getLines(request, &block_lines);
 	try
 	{
 		if (block_lines.size() < 1)
@@ -267,13 +271,48 @@ HeadersBlock::HeadersBlock(const std::vector<std::string> & block_lines, const s
 			else
 				break;
 		}
-		for (size_t i = end_headers; i < block_lines.size(); i++)
-			this->pushContent(block_lines[i]);
+		if (content_type != 2)	/* Non chunked transfer */
+			for (size_t i = end_headers; i < block_lines.size(); i++)
+				this->pushContent(block_lines[i]);
+		else if (content_type == 2)
+		{
+			while (42)
+			{
+				size_t nbr_char = std::stoi(block_lines[end_headers].c_str(), 0, 16);
+				end_headers++;
+				if (nbr_char == 0)
+					break;
+				std::string new_line;
+				for (size_t i = 0; i < nbr_char; i++)
+				{
+					size_t pos_cut = nbr_char;
+					std::string line = block_lines[end_headers];
+					size_t line_len = line.length();
+					if (nbr_char > line_len - 1)
+							pos_cut = line_len;
+					new_line.append(line.substr(0, pos_cut));
+					if (line_len - 1 < nbr_char - i)
+					{
+						new_line.append("\n");
+						i++;
+					}
+					end_headers++;
+					i += pos_cut;
+				}
+				if (block_lines[end_headers][0] == '\r')
+				{
+					new_line.append("\n");
+					end_headers++;
+				}
+				this->pushContent(new_line);
+			}
+		}
 	}
 	catch (const std::exception& e)
 	{
 		throwError(e);
-		throw(throwMessage("Can't parse header.")); 
+		exit(0);
+		throw(throwMessage("Can't parse header."));
 	}
 }
 

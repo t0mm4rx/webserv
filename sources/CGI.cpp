@@ -50,6 +50,7 @@ std::string CGI::_execCGI(char **args)
 	int tmp_fd;
 	int fd[2];
 
+	Log("Call CGI.");
 	exec_args = _getExecArgs();
 	if (pipe(fd) == -1)
 		throw CGIException("Cannot create pip to execute CGI.");
@@ -78,6 +79,7 @@ std::string CGI::_execCGI(char **args)
 		_freeArgs(args);
 		_freeArgs(exec_args);
 	}
+	Log("End CGI");
 	return (readFile("/tmp/webserv_cgi"));
 }
 

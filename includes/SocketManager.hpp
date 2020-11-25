@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 22:45:21 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/03 21:45:42 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/22 16:42:52 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ template <class T = Socket>
 class SocketManager
 {
 	private:
-		std::vector<T *>   _sockets;
+		std::vector<T>   _sockets;
 
 	public:
 		//WIP
@@ -49,7 +49,7 @@ class SocketManager
 		 * 
 		 *  @param socket the socket.
 		 */
-		void registerSocket(T *socket)
+		void registerSocket(T socket)
 		{
 			this->_sockets.push_back(socket);
 		}
@@ -59,7 +59,7 @@ class SocketManager
 			fd_set sockets_fds_set;
 
 			FD_ZERO(&sockets_fds_set);
-			for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+			for (typename std::vector<T>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
 				FD_SET((*it)->getSocketDescriptor(), &sockets_fds_set);
 			return (sockets_fds_set);
 		}
@@ -71,30 +71,30 @@ class SocketManager
 
 		T   &getBySD(int sd)
 		{
-			for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+			for (typename std::vector<T>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
 			{
 				if ((*it)->getSocketDescriptor() == sd)
-					return (*(*it));
+					return (*it);
 			}
 			throw(throwMessage("SD not found."));
 		}
 
 		T   &getBySDandHost(int sd, std::string host)
 		{
-			for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+			for (typename std::vector<T>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
 				if ((*it)->getSocketDescriptor() == sd)
 					for (size_t j = 0; j < (*it)->getServerConfiguration().names.size(); j++)
 						if ((*it)->getServerConfiguration().names[j] == host)
-							return (*(*it));
-			for (typename std::vector<T *>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
+							return (*it);
+			for (typename std::vector<T>::iterator it = this->_sockets.begin(); it != this->_sockets.end(); it++)
 				if ((*it)->getSocketDescriptor() == sd)
 					for (size_t j = 0; j < (*it)->getServerConfiguration().names.size(); j++)
 						if ((*it)->getServerConfiguration().names[j] == "default_server")
-							return (*(*it));
+							return (*it);
 			throw(throwMessage("SD & Host not found."));
 		}
 
-		std::vector<T *>  getSockets(void)
+		std::vector<T>  &getSockets(void)
 		{
 			return (this->_sockets);
 		}
@@ -110,9 +110,9 @@ class SocketManager
 		 */
 		bool    hasSD(int socket_descriptor)
 		{
-			std::vector<Socket *>::iterator it;
+			typename std::vector<T>::iterator it = this->_sockets.begin();
 
-			for (it = this->_sockets.begin(); it != this->_sockets.end(); it ++)
+			for (; it != this->_sockets.end(); it ++)
 			{
 				if ((*it)->getSocketDescriptor() == socket_descriptor)
 					return (true);

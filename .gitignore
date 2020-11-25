@@ -1,5 +1,7 @@
 .vscode
 objects/
 WebServ
+ubuntu_tester
+corr_server
 __pycache__
 tests/www/tmp/*
