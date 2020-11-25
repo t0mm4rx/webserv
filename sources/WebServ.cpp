@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/24 16:46:48 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 15:14:36 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,11 @@
 #include "../includes/HeadersBlock.hpp"
 
 char **g_envp;
+Server server;
 
 int main(int argc, char **argv, char **env)
 {
-	Log("Start Server.");
+	Log("Start Server(s)...");
 	char *path;
 
 	g_envp = env;
@@ -49,8 +50,10 @@ int main(int argc, char **argv, char **env)
 				sm.registerSocket(new Socket(test.getServers()[i]));
 			else
 				sm.registerSocket(new Socket(exist->getSocketDescriptor(), test.getServers()[i]));
+			Log("Server created on port " + itoa(test.getServers()[test.getServers().size() - 1].port)
+				+ " : " + itoa(sm.getSockets()[test.getServers().size() - 1]->getSocketDescriptor()));
 		}
-		Server server(sm);
+		server = Server(sm);
 		signal(SIGINT, endServer);
 		server.loop();
 	}
@@ -79,6 +82,7 @@ int treat(int sd, HeadersBlock &header_block, Configuration::server server_conf)
 void endServer(int signal)
 {
 	(void)signal;
-	std::cout << "\rEnding server..." << std::endl;
+	server.closeServer();
+	Log("Ending server...");
 	exit(0);
 }

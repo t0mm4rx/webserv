@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 22:45:21 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/22 16:42:52 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 14:54:21 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,12 @@ class SocketManager
 		
 		//WIP
 		SocketManager &operator=(const SocketManager& op)
-		{(void)op; return (*this); }
+		{
+			if (&op == this)
+				return (*this);
+			this->_sockets = op._sockets;
+			return (*this);
+		}
 
 		/**
 		 *  @brief Add a socket to the socket manager.

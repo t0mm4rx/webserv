@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:24:51 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/22 21:05:14 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 14:51:30 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Server
 {
 	private:
 		SocketManager<Socket *>   _sm;
+		SocketManager<SubSocket *> _sub_sm;
 
 		int			waitConnection(fd_set *read_set, fd_set *write_set, int max_sd);
 		int         acceptConnection(int sd, int max_sd, fd_set *read_set, fd_set *write_set, SocketManager<SubSocket *>& sub_sm);
@@ -35,12 +36,14 @@ class Server
 
 
 	public:
+		Server();
 		Server(SocketManager<Socket *> sm);
 		Server(const Server& copy);
 		~Server();
 		Server &operator=(const Server& op);
 
 		void loop();
+		void closeServer();
 };
 
 #endif
