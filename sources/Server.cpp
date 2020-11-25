@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/23 17:40:14 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 00:01:04 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,25 +29,6 @@ Server::~Server()
 //WIP
 Server &Server::operator=(const Server& op)
 {(void)op; return (*this); }
-
-
-/**
- *  @brief Wait that one of the listener sockets have a
- *  connection.
- * 
- *  @param working_set the socket descriptor set of treatment.
- *  @param max_sd the total of socket descriptor.
- *  @return the number of sockets that are ready.
- */
-int Server::waitConnection(fd_set *read_set, fd_set *write_set, int max_sd)
-{
-	int socket_ready;
-
-	if ((socket_ready = select(max_sd + 1, read_set,
-		write_set, NULL, NULL)) < 0)
-		throw(throwMessageErrno("Wait connection"));
-	return (socket_ready);
-}
 
 static std::string ft_inet_ntoa(struct in_addr in)
 {
@@ -103,100 +84,37 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *read_set, fd_set *write
 	return (max_sd);
 }
 
-int Server::getChunk(int sd, std::vector<std::string>& request)
-{
-    char buffer_recv[1];
-	int rc = 0;
-	std::string line;
+#define BUFFER_SIZE_READ 1000000
 
-    int tot_chunk_size = 0;
-    while (42)
-    {
-        int chunk_size = 0;
-        while (42)
-        {
-            buffer_recv[0] = 0;
-            rc = read(sd, buffer_recv, 1);
-            if (buffer_recv[0] == '\n')
-            {
-                DEBUG("LINE = " << line);
-                if (line == "\r")
-                {
-                    DEBUG("EMPTY");
-                    line.clear();
-                    chunk_size = -1;
-                    break;
-                }
-                chunk_size = std::stoi(line.c_str(), 0, 16);
-                DEBUG("Chunk Size = " << chunk_size);
-                line.clear();
-                break;
-            }
-            else 
-                line += buffer_recv[0];
-
-            if (rc <= 0)
-            {
-                if (rc == 0)
-                {
-                    DEBUG("Connection closed...");
-                    return (-1);
-                }
-                else if (errno != EWOULDBLOCK)
-                    throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
-                return (0);
-            }
-        }
-        
-        if (chunk_size == 0)
-            break;
-        if (chunk_size > 0)
-        {
-            tot_chunk_size += chunk_size;
-            while (chunk_size != 0)
-            {
-                DEBUG("CHUNCK READ = " << chunk_size);
-                char chunk_buffer_recv[chunk_size + 1];
-                bzero(chunk_buffer_recv, chunk_size + 1);
-                rc = read(sd, chunk_buffer_recv, chunk_size);
-                chunk_size -= rc;
-                DEBUG("RC = " << rc  << " | first = " << chunk_buffer_recv[0]);
-                line = std::string(chunk_buffer_recv);
-                request.push_back(line);
-                line.clear();
-            }
-        }
-    }
-    return (1);
-}
-
-#define BUFFER_SIZE_READ 20
-
-static bool hasContent(std::string request)
+/* return 0 = nop, 1 = classic content, 2 = chunked*/
+static int hasContent(std::string request)
 {
 	size_t pos = 0;
 	size_t pos_in = 0;
+	size_t end = 0;
 	std::string line;
 
 	while ((pos = request.find("\n")) != std::string::npos)
 	{
 		line = request.substr(0, pos);
-		if (((pos_in = line.find("Content")) != std::string::npos
-			|| (pos_in = line.find("Transfer")) != std::string::npos)
+		if ((pos_in = line.find("Transfer-Encoding: chunked")) != std::string::npos
 			&& pos_in == 0)
-			return (true);
+			return (2);
+		else if (((pos_in = line.find("Content")) != std::string::npos)
+			&& pos_in == 0)
+			return (1);
+		if ((end = request.find("\r\n\r\n")) != std::string::npos
+			&& end == pos - 1)
+			break;
 		request.erase(0, pos + 1);
 	}
-	return (false);
+	return (0);
 }
 
 /**
  *  @brief Set the message get from the socket into
  *  the buffer.
  * 
- *  @param sd the socket.
- *  @param buffer the buffer to stock the message.
- *  @param buffer_size the size of the buffer.
  *  @return -1 if and error appear, 0 otherwise.
  */
 int Server::receiveConnection(int sd, std::string& request)
@@ -209,131 +127,30 @@ int Server::receiveConnection(int sd, std::string& request)
 	{
 		request.append(buffer_recv);
 		size_t pos;
-		if ((pos = request.find("\r\n\r\n")) != std::string::npos && hasContent(request) == false) // add if body
+		int has_content =  hasContent(request);
+		if ((pos = request.find("\r\n\r\n")) != std::string::npos && has_content == 0)
 			return (0);
-		else if (hasContent(request) == true)
+		else if (has_content > 0)
 		{
 			std::string rest = request.substr(pos + 4, request.length() - (pos + 4));
-			if (rest.find("\r\n\r\n") != std::string::npos)
+			std::string to_find = "\r\n\r\n";
+			if (has_content == 2)
+				to_find = "0" + to_find;
+			if ((pos = rest.find(to_find)) != std::string::npos)
 			{
-				std::cout << "Request = [" << request << "]\n";
-				return (0);
+				if ((has_content == 2 && (pos == 0 || (rest[pos - 1] == '\n' && rest[pos - 2] == '\r')))
+					|| has_content == 1)
+					return (0);
 			}
 		}
-
 	}
 	else
 	{
-		std::cout << "RC error = " << rc << std::endl;
-		if (errno == EWOULDBLOCK)
-			DEBUG("EWOULDBLOCK = " << rc);
-		if (rc == 0)
-		{
-			DEBUG("Connection closed...");
-			return (-1);
-		}
-		else if (errno != EWOULDBLOCK)
-			throw(throwMessageErrno("IN TO REPLACE BY ERROR PAGE : recv() failed"));
-		else if (request.length() != 0)
-		{
-			return (0);
-		}
+		Log("Error or connection close on : " + itoa(sd));
+		return (-1);
 	}
 	return (1);
 }
-
-
-// int Server::receiveConnection(int sd, std::vector<std::string>& request)
-// {
-// 	int rc = 0;
-// 	char buffer_recv[1];
-// 	std::string line;
-// 	bool headers_ended = false;
-// 	int content_type = 0;
-// 	int content_len = 0;
-
-// 	while (42)
-// 	{
-// 		bzero(buffer_recv, 1);
-// 		if (headers_ended == true)
-// 		{
-// 			if (content_type == 1)
-// 			{
-// 			    int tot_content_size = 0;
-//                 tot_content_size += content_len;
-//                 while (content_len != 0)
-//                 {
-//                     DEBUG("Content_len = " << content_len);
-//                     char content_recv[content_len + 1];
-//                     bzero(content_recv, content_len + 1);
-//                     rc = read(sd, content_recv, content_len);
-//                     content_len -= rc;
-//                     DEBUG("RC = " << rc  << " | first = " << content_recv[0]);
-//                     line = std::string(content_recv);
-//                     request.push_back(line);
-//                     line.clear();
-//                 }
-// 				DEBUG("TOT content size = " << tot_content_size);
-// 			}
-// 			else if (content_type == 2)
-// 			{
-// 			    int rtn = getChunk(sd, request);
-//                 if (rtn != 1)
-//                     return (rtn);
-// 			}
-// 			return (0);
-// 		}
-// 		else
-// 		{
-// 			buffer_recv[0] = 0;
-// 			rc = read(sd, buffer_recv, 1);
-// 		}
-
-// 		if (buffer_recv[0] == '\n')
-// 		{
-// 			request.push_back(line);
-// 			if (line.length() == 1 && line[0] == '\r')
-// 			{
-// 				DEBUG("END OP");
-// 				headers_ended = true;
-// 			}
-// 			else
-// 			{
-// 				if (line.find("Content-Length: ") != std::string::npos)
-// 				{
-// 					DEBUG("SUB = " << line.substr(std::string("Content-Length: ").length(), line.length() - 2));
-// 					content_len = atoi(line.substr(std::string("Content-Length: ").length(), line.length()).c_str());
-// 					DEBUG("Content-Length IN: " << content_len);
-// 					content_type = 1;
-// 				}
-// 				else if (line.find("Transfer-Encoding: ") != std::string::npos)
-// 				{
-// 					if (line.find("chunked") != std::string::npos)
-// 						content_type = 2;
-// 				}
-// 			}
-// 			line.clear();
-// 		}
-// 		else
-// 			line += buffer_recv[0];
-
-// 		if (rc <= 0)
-// 		{
-// 			DEBUG("RC = " << rc);
-// 			if (errno == EWOULDBLOCK)
-// 				DEBUG("EWOULDBLOCK = " << rc);
-// 			if (rc == 0)
-// 			{
-// 				DEBUG("Connection closed...");
-// 				return (-1);
-// 			}
-// 			else if (errno != EWOULDBLOCK)
-// 				throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : recv() failed"));
-// 			break;
-// 		}
-// 	}
-// 	return(0);
-// }
 
 /**
  *  @brief Close the connection with the socket
@@ -447,8 +264,7 @@ void Server::loop()
 		write_set = master_write_set;
 		try
 		{
-			this->waitConnection(&read_set, &write_set, max_sd);
-			
+			select(max_sd + 1, &read_set, &write_set, NULL, NULL);
 			/* Servers */
 			for (size_t server = 0; server < this->_sm.getSockets().size(); server++)
 			{
@@ -468,20 +284,29 @@ void Server::loop()
 				int rtn;
 				SubSocket &client_socket = *sub_sm.getSockets()[client];
 				int	client_sd = client_socket.getSocketDescriptor();
+				bool client_treat = false;
 				
 				if (FD_ISSET(client_sd, &write_set) && client_socket.informationReceived() == true)
 				{
 					try
 					{
-						HeadersBlock test(client_socket.getRequest(), client_socket.getClientIp());
+						HeadersBlock test(client_socket.getRequest(), client_socket.getClientIp(), hasContent(client_socket.getRequest()));
+						Log ("End head request treatment for : " + itoa(client_sd));
 						std::string server_name = this->getServerName(test);
 						Socket *last = this->_sm.getBySDandHost(client_socket.getParent()->getSocketDescriptor(), server_name);
 						size_t len = test.getPlainRequest().length();
 						if (test.getPlainRequest() == "\r\n" || len < 9)
 							throw(throwMessage("Empty request"));
-						treat(client_sd, write_set, test, (*last).getServerConfiguration());
+						if (treat(client_sd, test, (*last).getServerConfiguration()) == -1)
+						{
+							max_sd = this->closeConnection(client_sd, max_sd, &master_rest_set, &master_write_set);
+							sub_sm.getSockets().erase(sub_sm.getSockets().begin() + client);
+							client--;
+							continue;
+						}
 						client_socket.getRequest().clear();
 						client_socket.setReceived(false);
+						client_treat = true;
 					}
 					catch (const std::exception& e)
 					{
@@ -489,12 +314,13 @@ void Server::loop()
 					}
 				}
 
-				if (FD_ISSET(client_sd, &read_set))
+				if (FD_ISSET(client_sd, &read_set) && client_treat == false)
 				{
 					if ((rtn = this->receiveConnection(client_sd, client_socket.getRequest())) < 0)
 					{
 						max_sd = this->closeConnection(client_sd, max_sd, &master_rest_set, &master_write_set);
 						sub_sm.getSockets().erase(sub_sm.getSockets().begin() + client);
+						client--;
 					}
 					else if (rtn == 0)
 						client_socket.setReceived(true);

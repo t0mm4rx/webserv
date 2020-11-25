@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/22 00:29:54 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/22 21:09:31 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/24 13:11:10 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ class HeadersBlock
 		int     getHeaderFileds(std::vector<std::string> lines);
 
 	public:
-		HeadersBlock(const std::string & request, const std::string & client_ip);
+		HeadersBlock(const std::string & request, const std::string & client_ip, int content_type);
 		HeadersBlock(const HeadersBlock& copy);
 		~HeadersBlock();
 		HeadersBlock &operator=(const HeadersBlock& op);

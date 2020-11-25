@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:25:44 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/21 16:25:55 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/24 16:47:22 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ class throwMessageErrno : public std::exception {
 void throwError(const std::exception& ex);
 void outError(const std::string& msg);
 
-int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration::server server_conf);
+int treat(int sd, HeadersBlock &header_block, Configuration::server server_conf);
 
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:17:48 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/22 16:25:48 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/24 16:46:48 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,18 +60,16 @@ int main(int argc, char **argv, char **env)
 	return (0);
 }
 
-int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration::server server_conf)
+int treat(int sd, HeadersBlock &header_block, Configuration::server server_conf)
 {
 	std::string response = RequestInterpretor(header_block, server_conf).getResponse();
 
 	Log("Send response to : " + itoa(sd));
-	int rc = 0;
-	if (FD_ISSET(sd, &working_set))
-		rc = write(sd, response.c_str(), response.size());
+	int	rc = write(sd, response.c_str(), response.size());
 	DEBUG("END SEND");
-	if (rc < 0)
+	if (rc <= 0)
 	{
-		DEBUG("send() failed");
+		Log("Error or connection close on : " + itoa(sd));
 		return (-1);
 	}
 	return (0);
