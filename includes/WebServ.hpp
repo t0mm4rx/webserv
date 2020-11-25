@@ -24,6 +24,7 @@
 #include <exception>
 #include <iostream>
 #include <sstream>
+#include <signal.h>
 #include "Configuration.hpp"
 #include "HeadersBlock.hpp"
 
@@ -59,8 +60,7 @@ class throwMessageErrno : public std::exception {
 
 void throwError(const std::exception& ex);
 void outError(const std::string& msg);
-
 int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration::server server_conf);
-
+void endServer(int signal);
 
 #endif

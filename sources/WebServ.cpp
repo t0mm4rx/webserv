@@ -50,6 +50,7 @@ int main(int argc, char **argv, char **env)
 				sm.registerSocket(new Socket(exist->getSocketDescriptor(), test.getServers()[i]));
 		}
 		Server server(sm);
+		signal(SIGINT, endServer);
 		server.loop();
 	}
 	catch(const std::exception& e)
@@ -79,4 +80,11 @@ int treat(int sd, fd_set working_set, HeadersBlock &header_block, Configuration:
 		return (-1);
 	}
 	return (0);
+}
+
+void endServer(int signal)
+{
+	(void)signal;
+	std::cout << "\rEnding server..." << std::endl;
+	exit(0);
 }
