@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/25 15:07:28 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/25 16:15:44 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,18 @@ Server::Server()
 	_sub_sm()
 {}
 
-//WIP
 Server::Server(SocketManager<Socket *> sm)
 :
 	_sm(sm),
 	_sub_sm()
 {}
 
-//WIP
 Server::Server(const Server& copy)
-{(void)copy;}
+:
+	_sm(copy._sm),
+	_sub_sm(copy._sub_sm)
+{}
 
-//WIP
 Server::~Server()
 {}
 
@@ -75,15 +75,15 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *read_set, fd_set *write
 
 	DEBUG("Readable socket")
 
-	do
-	{
+	// do
+	// {
 		sockaddr_in client;
 		socklen_t size = sizeof(client);
 		if ((new_sd = accept(sd, (sockaddr *)&client, &size)) < 0)
 		{
 			if (errno != EWOULDBLOCK)
-				throw(throwMessageErrno("TO REPLACE BY ERROR PAGE : accept() failed"));
-			break;
+				throw(throwMessageErrno("accept() failed"));
+			// break;
 		}
 		
 		Log("New client connection : " + itoa(new_sd));
@@ -92,7 +92,7 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *read_set, fd_set *write
 		FD_SET(new_sd, write_set);
 		if (new_sd > max_sd)
 			max_sd = new_sd;
-	} while (new_sd != -1);
+	// } while (new_sd != -1);
 	
 	return (max_sd);
 }
@@ -283,12 +283,7 @@ void Server::loop()
 			{
 				int server_sd = this->_sm.getSockets()[server]->getSocketDescriptor();
 				if (FD_ISSET(server_sd, &read_set))
-				{
-					if (this->_sm.getSockets().size() + this->_sub_sm.getSockets().size() < MAX_CONNECTION)
-						max_sd = this->acceptConnection(server_sd, max_sd, &master_rest_set, &master_write_set, this->_sub_sm);
-					else
-						std::cout << "MAX CONNECTION" << std::endl; //rtn 503
-				}
+					max_sd = this->acceptConnection(server_sd, max_sd, &master_rest_set, &master_write_set, this->_sub_sm);
 			}
 
 			/* Clients */
@@ -303,14 +298,14 @@ void Server::loop()
 				{
 					try
 					{
-						HeadersBlock test(client_socket.getRequest(), client_socket.getClientIp(), hasContent(client_socket.getRequest()));
+						HeadersBlock header_block(client_socket.getRequest(), client_socket.getClientIp(), hasContent(client_socket.getRequest()));
 						Log ("End head request treatment for : " + itoa(client_sd));
-						std::string server_name = this->getServerName(test);
+						std::string server_name = this->getServerName(header_block);
 						Socket *last = this->_sm.getBySDandHost(client_socket.getParent()->getSocketDescriptor(), server_name);
-						size_t len = test.getPlainRequest().length();
-						if (test.getPlainRequest() == "\r\n" || len < 9)
+						size_t len = header_block.getPlainRequest().length();
+						if (header_block.getPlainRequest() == "\r\n" || len < 9)
 							throw(throwMessage("Empty request"));
-						if (treat(client_sd, test, (*last).getServerConfiguration()) == -1)
+						if (treat(client_sd, header_block, (*last).getServerConfiguration()) == -1)
 						{
 							max_sd = this->closeConnection(client_sd, max_sd, &master_rest_set, &master_write_set);
 							delete this->_sub_sm.getSockets()[client];
