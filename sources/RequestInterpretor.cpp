@@ -182,20 +182,7 @@ std::string RequestInterpretor::_post(std::string ressource_path, std::map<std::
 			headers["Location"] = _header_block.getRequestLine()._request_target;
 		}
 		else
-		{
-			std::string dir = _location.root + _location.upload_path + _header_block.getRequestLine()._request_target;
-			DEBUG("DIR = " << dir);
-			dir = dir.substr(0, dir.find_last_of('/'));
-			DEBUG("DIR = " << dir);
-			DIR* dir_pointer = opendir(dir.c_str());
-			if (dir_pointer)
-				closedir(dir_pointer);
-			else
-			if (errno != ENOENT || mkdir(dir.c_str(), 0777) == -1)
-			{
-				return (_generateResponse(404, headers, _getErrorHTMLPage(404)));
-			}
-		}
+			return (_generateResponse(500, headers, _getErrorHTMLPage(500)));
 	}
 	catch (std::exception & ex)
 	{
@@ -244,13 +231,13 @@ std::string RequestInterpretor::_put(std::string ressource_path, std::map<std::s
 			rtn = 204;
 		}
 		else
-			return (_generateResponse(409, headers, _getErrorHTMLPage(409)));
+			return (_generateResponse(500, headers, _getErrorHTMLPage(500)));
 		headers["Content-Location"] = _header_block.getRequestLine()._request_target;
 	}
 	catch (std::exception & ex)
 	{
 		throwError(ex);
-		return (_generateResponse(409, headers, _getErrorHTMLPage(409)));
+		return (_generateResponse(500, headers, _getErrorHTMLPage(500)));
 	}
 	return (_generateResponse(rtn, headers, ""));
 }
