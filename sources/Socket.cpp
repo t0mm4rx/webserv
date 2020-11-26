@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/20 16:38:43 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/26 16:36:45 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/26 17:05:18 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ void Socket::socketListener(void)
  */
 Socket::Socket(const struct Configuration::server& server)
 :
-	_server_config(server)
+	_sd(-1), _option_buffer() ,_server_config(server)
 {
 	try
 	{
