@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/26 15:34:44 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/26 16:43:34 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,16 +80,18 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *read_set, fd_set *write
 	if ((new_sd = accept(sd, (sockaddr *)&client, &size)) < 0)
 	{
 		if (errno != EWOULDBLOCK)
-			throw(throwMessageErrno("accept() failed"));
+			throw(throwMessageErrno("accept() failed, " + itoa(errno)));
+		return (max_sd);
 	}
-	
+
+	// std::cout << "new_sd"
+
 	Log("New client connection : " + itoa(new_sd));
 	sub_sm.registerSocket(new SubSocket(this->_sm.getBySD(sd), ft_inet_ntoa(client.sin_addr), new_sd));
 	FD_SET(new_sd, read_set);
 	FD_SET(new_sd, write_set);
 	if (new_sd > max_sd)
 		max_sd = new_sd;
-	
 	return (max_sd);
 }
 
@@ -360,7 +362,7 @@ void Server::loop()
 				}
 
 			}
-		}
+		} 
 		catch(const std::exception& e)
 		{
 			throwError(e);
