@@ -156,7 +156,6 @@ int Server::receiveConnection(int sd, std::string& request)
 	if (rc > 0)
 	{
 		request.append(buffer_recv);
-		std::cout << "REQUEST = [" << request << "]\n";
 		size_t pos;
 		int has_content = hasContent(request);
 		if ((pos = request.find("\r\n\r\n")) != std::string::npos && has_content == 0)
@@ -173,12 +172,10 @@ int Server::receiveConnection(int sd, std::string& request)
 				to_find = "0" + to_find;
 			if ((pos = rest.find(to_find)) != std::string::npos)
 			{
-				std::cout << "HAS END CONTENT\n";
 				if ((has_content == 2 && (pos == 0 || (rest[pos - 1] == '\n' && rest[pos - 2] == '\r')))
 					|| has_content == 1)
 					return (0);
 			}
-			std::cout << "HAS CONTENT\n";
 		}
 	}
 	else
@@ -358,7 +355,6 @@ void Server::loop()
 					}
 					else if (rtn == 0)
 						client_socket.setReceived(true);
-					std::cout << "RTN = " << rtn << "\n";
 				}
 
 			}
