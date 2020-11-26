@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/26 14:53:27 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/26 15:34:44 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,45 +98,47 @@ int Server::acceptConnection(int sd, int max_sd, fd_set *read_set, fd_set *write
 /* return 0 = nop, 1 = classic content, 2 = chunked*/
 static int hasContent(std::string request)
 {
-	size_t pos = 0;
 	size_t pos_in = 0;
-	size_t end = 0;
 	std::string line;
 
-	while ((pos = request.find("\n")) != std::string::npos)
+	size_t pos = 0;
+	size_t end = request.find("\n");
+	while (end != std::string::npos)
 	{
-		line = request.substr(0, pos);
+		line = request.substr(pos, end - pos);
 		if ((pos_in = line.find("Transfer-Encoding: chunked")) != std::string::npos
 			&& pos_in == 0)
 			return (2);
 		else if (((pos_in = line.find("Content")) != std::string::npos)
 			&& pos_in == 0)
 			return (1);
-		if ((end = request.find("\r\n\r\n")) != std::string::npos
-			&& end == pos - 1)
+		if ((pos_in = request.find("\r\n\r\n")) != std::string::npos
+			&& pos_in == pos)
 			break;
-		request.erase(0, pos + 1);
+		pos = end + 1;
+		end = request.find("\n", pos);
 	}
 	return (0);
 }
 
 static size_t getContentLen(std::string request)
 {
-	size_t pos = 0;
-	size_t pos_in = 0;
-	size_t end = 0;
+		size_t pos_in = 0;
 	std::string line;
 
-	while ((pos = request.find("\n")) != std::string::npos)
+	size_t pos = 0;
+	size_t end = request.find("\n");
+	while (end != std::string::npos)
 	{
-		line = request.substr(0, pos);
+		line = request.substr(pos, end - pos);
 		if (((pos_in = line.find("Content-Length")) != std::string::npos)
 			&& pos_in == 0)
 			return (atoi(line.substr(line.find(":") + 2, line.length()).c_str()));
-		if ((end = request.find("\r\n\r\n")) != std::string::npos
-			&& end == pos - 1)
+		if ((pos_in = request.find("\r\n\r\n")) != std::string::npos
+			&& pos_in == pos)
 			break;
-		request.erase(0, pos + 1);
+		pos = end + 1;
+		end = request.find("\n", pos);
 	}
 	return (0);
 }
