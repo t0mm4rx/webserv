@@ -6,7 +6,7 @@
 /*   By: rchallie <rchallie@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/21 15:25:08 by rchallie          #+#    #+#             */
-/*   Updated: 2020/11/25 16:21:20 by rchallie         ###   ########.fr       */
+/*   Updated: 2020/11/26 14:53:27 by rchallie         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,27 @@ static int hasContent(std::string request)
 	return (0);
 }
 
+static size_t getContentLen(std::string request)
+{
+	size_t pos = 0;
+	size_t pos_in = 0;
+	size_t end = 0;
+	std::string line;
+
+	while ((pos = request.find("\n")) != std::string::npos)
+	{
+		line = request.substr(0, pos);
+		if (((pos_in = line.find("Content-Length")) != std::string::npos)
+			&& pos_in == 0)
+			return (atoi(line.substr(line.find(":") + 2, line.length()).c_str()));
+		if ((end = request.find("\r\n\r\n")) != std::string::npos
+			&& end == pos - 1)
+			break;
+		request.erase(0, pos + 1);
+	}
+	return (0);
+}
+
 /**
  *  @brief Set the message get from the socket into
  *  the buffer.
@@ -135,22 +156,29 @@ int Server::receiveConnection(int sd, std::string& request)
 	if (rc > 0)
 	{
 		request.append(buffer_recv);
+		std::cout << "REQUEST = [" << request << "]\n";
 		size_t pos;
-		int has_content =  hasContent(request);
+		int has_content = hasContent(request);
 		if ((pos = request.find("\r\n\r\n")) != std::string::npos && has_content == 0)
 			return (0);
-		else if (has_content > 0)
+		if (has_content > 0)
 		{
 			std::string rest = request.substr(pos + 4, request.length() - (pos + 4));
+			if (has_content != 2 && getContentLen(request) == rest.length())
+				return (0);
+			
 			std::string to_find = "\r\n\r\n";
+
 			if (has_content == 2)
 				to_find = "0" + to_find;
 			if ((pos = rest.find(to_find)) != std::string::npos)
 			{
+				std::cout << "HAS END CONTENT\n";
 				if ((has_content == 2 && (pos == 0 || (rest[pos - 1] == '\n' && rest[pos - 2] == '\r')))
 					|| has_content == 1)
 					return (0);
 			}
+			std::cout << "HAS CONTENT\n";
 		}
 	}
 	else
@@ -330,6 +358,7 @@ void Server::loop()
 					}
 					else if (rtn == 0)
 						client_socket.setReceived(true);
+					std::cout << "RTN = " << rtn << "\n";
 				}
 
 			}
